@@ -101,27 +101,6 @@ services:
       - "8885:8888"
     restart: unless-stopped
 
-  # Go Proxy Server
-  proxy-server:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: vpn-proxy-server
-    depends_on:
-      - vpn-florida
-      - vpn-california
-      - vpn-newyork
-      - vpn-texas
-      - vpn-chicago
-    networks:
-      vpn_network:
-        ipv4_address: 172.22.0.100
-    ports:
-      - "8080:8080"
-    environment:
-      - PORT=8080
-    restart: unless-stopped
-
 networks:
   vpn_network:
     driver: bridge
