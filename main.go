@@ -53,11 +53,11 @@ type VPNPool struct {
 
 func NewVPNPool() *VPNPool {
 	endpoints := []*VPNEndpoint{
-		{Name: "US Florida", ProxyURL: "http://172.22.0.10:8888", Active: true},
-		{Name: "US California", ProxyURL: "http://172.22.0.11:8888", Active: true},
-		{Name: "US New York", ProxyURL: "http://172.22.0.12:8888", Active: true},
-		{Name: "US Texas", ProxyURL: "http://172.22.0.13:8888", Active: true},
-		{Name: "US Chicago", ProxyURL: "http://172.22.0.14:8888", Active: true},
+		{Name: "US Florida", ProxyURL: "http://127.0.0.1:8881", Active: true},
+		{Name: "US California", ProxyURL: "http://127.0.0.1:8882", Active: true},
+		{Name: "US New York", ProxyURL: "http://127.0.0.1:8883", Active: true},
+		{Name: "US Texas", ProxyURL: "http://127.0.0.1:8884", Active: true},
+		{Name: "US Chicago", ProxyURL: "http://127.0.0.1:8885", Active: true},
 	}
 
 	return &VPNPool{
