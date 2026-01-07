@@ -1,0 +1,130 @@
+version: '3.8'
+
+services:
+  # PIA VPN - US Florida (Miami)
+  vpn-florida:
+    image: qmcgaw/gluetun
+    container_name: vpn-florida
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US Florida
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.10
+    ports:
+      - "8881:8888"  # HTTP proxy port
+    restart: unless-stopped
+
+  # PIA VPN - US California
+  vpn-california:
+    image: qmcgaw/gluetun
+    container_name: vpn-california
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US California
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.11
+    ports:
+      - "8882:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US New York
+  vpn-newyork:
+    image: qmcgaw/gluetun
+    container_name: vpn-newyork
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US New York
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.12
+    ports:
+      - "8883:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US Texas
+  vpn-texas:
+    image: qmcgaw/gluetun
+    container_name: vpn-texas
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US Texas
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.13
+    ports:
+      - "8884:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US Chicago
+  vpn-chicago:
+    image: qmcgaw/gluetun
+    container_name: vpn-chicago
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US Chicago
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.14
+    ports:
+      - "8885:8888"
+    restart: unless-stopped
+
+  # Go Proxy Server
+  proxy-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vpn-proxy-server
+    depends_on:
+      - vpn-florida
+      - vpn-california
+      - vpn-newyork
+      - vpn-texas
+      - vpn-chicago
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.100
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+    restart: unless-stopped
+
+networks:
+  vpn_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.22.0.0/16

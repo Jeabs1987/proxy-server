@@ -4,7 +4,7 @@ A lightweight system for hosting multiple Private Internet Access (PIA) VPN inst
 
 ## Features
 
-- 🚀 **Multiple VPN Locations**: Run 5 concurrent VPN connections (US East, US West, UK London, Japan, Germany)
+- 🚀 **Multiple VPN Locations**: Run 5 concurrent VPN connections (Florida, California, New York, Texas, Chicago)
 - 🔄 **Smart Routing**: Round-robin, random, or specific VPN selection
 - 🐳 **Docker-based**: Lightweight, isolated VPN containers using Gluetun
 - 🔧 **Easy Configuration**: Simple environment-based setup
@@ -28,9 +28,9 @@ A lightweight system for hosting multiple Private Internet Access (PIA) VPN inst
 ┌──────────────────────────────────────────┐
 │              VPN Containers              │
 ├──────────┬──────────┬──────────┬─────────┤
-│ US East  │ US West  │ UK London│  Japan  │
+│ Florida  │California│ New York │  Texas  │
 │          │          │          │         │
-│ Germany  │          │          │         │
+│ Chicago  │          │          │         │
 └──────────┴──────────┴──────────┴─────────┘
        │
        ▼ Encrypted VPN Traffic
@@ -103,7 +103,7 @@ Proxy HTTP requests through VPN connections.
   - `random`: Select a random VPN for each request
   - `specific`: Use a specific VPN (requires `vpn` parameter)
 - `vpn` (optional): VPN name when using `strategy=specific`
-  - Available: `US East`, `US West`, `UK London`, `Japan`, `Germany`
+  - Available: `US Florida`, `US California`, `US New York`, `US Texas`, `US Chicago`
 
 **Response Headers:**
 - `X-VPN-Used`: Name of the VPN that handled the request
@@ -122,15 +122,15 @@ curl "http://localhost:8080/proxy?url=https://api.ipify.org"
 
 #### Fetch a Website
 ```bash
-# Fetch through UK VPN
-curl "http://localhost:8080/proxy?url=https://example.com&strategy=specific&vpn=UK%20London"
+# Fetch through Texas VPN
+curl "http://localhost:8080/proxy?url=https://example.com&strategy=specific&vpn=US%20Texas"
 ```
 
 #### API Requests
 ```bash
-# Make API call through Japan VPN
+# Make API call through New York VPN
 curl -H "Accept: application/json" \
-  "http://localhost:8080/proxy?url=https://api.github.com&strategy=specific&vpn=Japan"
+  "http://localhost:8080/proxy?url=https://api.github.com&strategy=specific&vpn=US%20New%20York"
 ```
 
 #### Check Which VPN Was Used
