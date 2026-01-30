@@ -561,17 +561,17 @@ services:
       - "8908:8888"
     restart: unless-stopped
 
-  # PIA VPN - US Honolulu
-  vpn-honolulu:
+  # PIA VPN - US Wilmington
+  vpn-wilmington:
     image: qmcgaw/gluetun
-    container_name: vpn-honolulu
+    container_name: vpn-wilmington
     cap_add:
       - NET_ADMIN
     environment:
       - VPN_SERVICE_PROVIDER=private internet access
       - OPENVPN_USER=${PIA_USERNAME}
       - OPENVPN_PASSWORD=${PIA_PASSWORD}
-      - SERVER_REGIONS=US Honolulu
+      - SERVER_REGIONS=US Wilmington
       - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
       - HTTPPROXY=on
     networks:
@@ -581,17 +581,17 @@ services:
       - "8909:8888"
     restart: unless-stopped
 
-  # PIA VPN - US Indiana
-  vpn-indiana:
+  # PIA VPN - US East Streaming Optimized
+  vpn-east-streaming:
     image: qmcgaw/gluetun
-    container_name: vpn-indiana
+    container_name: vpn-east-streaming
     cap_add:
       - NET_ADMIN
     environment:
       - VPN_SERVICE_PROVIDER=private internet access
       - OPENVPN_USER=${PIA_USERNAME}
       - OPENVPN_PASSWORD=${PIA_PASSWORD}
-      - SERVER_REGIONS=US Indiana
+      - SERVER_REGIONS=US East Streaming Optimized
       - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
       - HTTPPROXY=on
     networks:
@@ -641,17 +641,17 @@ services:
       - "8912:8888"
     restart: unless-stopped
 
-  # PIA VPN - US Kentucky
-  vpn-kentucky:
+  # PIA VPN - US West Streaming Optimized
+  vpn-west-streaming:
     image: qmcgaw/gluetun
-    container_name: vpn-kentucky
+    container_name: vpn-west-streaming
     cap_add:
       - NET_ADMIN
     environment:
       - VPN_SERVICE_PROVIDER=private internet access
       - OPENVPN_USER=${PIA_USERNAME}
       - OPENVPN_PASSWORD=${PIA_PASSWORD}
-      - SERVER_REGIONS=US Kentucky
+      - SERVER_REGIONS=US West Streaming Optimized
       - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
       - HTTPPROXY=on
     networks:
@@ -941,17 +941,17 @@ services:
       - "8927:8888"
     restart: unless-stopped
 
-  # PIA VPN - US Tennessee
-  vpn-tennessee:
+  # PIA VPN - CA Toronto
+  vpn-toronto:
     image: qmcgaw/gluetun
-    container_name: vpn-tennessee
+    container_name: vpn-toronto
     cap_add:
       - NET_ADMIN
     environment:
       - VPN_SERVICE_PROVIDER=private internet access
       - OPENVPN_USER=${PIA_USERNAME}
       - OPENVPN_PASSWORD=${PIA_PASSWORD}
-      - SERVER_REGIONS=US Tennessee
+      - SERVER_REGIONS=CA Toronto
       - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
       - HTTPPROXY=on
     networks:
