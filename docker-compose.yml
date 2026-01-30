@@ -101,6 +101,146 @@ services:
       - "8885:8888"
     restart: unless-stopped
 
+  # PIA VPN - US Seattle
+  vpn-seattle:
+    image: qmcgaw/gluetun
+    container_name: vpn-seattle
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US Seattle
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.15
+    ports:
+      - "8886:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US Denver
+  vpn-denver:
+    image: qmcgaw/gluetun
+    container_name: vpn-denver
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US Denver
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.16
+    ports:
+      - "8887:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US Atlanta
+  vpn-atlanta:
+    image: qmcgaw/gluetun
+    container_name: vpn-atlanta
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US Atlanta
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.17
+    ports:
+      - "8888:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US Las Vegas
+  vpn-lasvegas:
+    image: qmcgaw/gluetun
+    container_name: vpn-lasvegas
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US Las Vegas
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.18
+    ports:
+      - "8889:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US Washington DC
+  vpn-washingtondc:
+    image: qmcgaw/gluetun
+    container_name: vpn-washingtondc
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US Washington DC
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.19
+    ports:
+      - "8890:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US Silicon Valley
+  vpn-siliconvalley:
+    image: qmcgaw/gluetun
+    container_name: vpn-siliconvalley
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US Silicon Valley
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.20
+    ports:
+      - "8891:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US East
+  vpn-east:
+    image: qmcgaw/gluetun
+    container_name: vpn-east
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US East
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.21
+    ports:
+      - "8892:8888"
+    restart: unless-stopped
+
 networks:
   vpn_network:
     driver: bridge
