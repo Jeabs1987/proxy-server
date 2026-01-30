@@ -65,6 +65,18 @@ func NewVPNPool() *VPNPool {
 		{Name: "US Washington DC", ProxyURL: "http://127.0.0.1:8890", Active: true},
 		{Name: "US Silicon Valley", ProxyURL: "http://127.0.0.1:8891", Active: true},
 		{Name: "US East", ProxyURL: "http://127.0.0.1:8892", Active: true},
+		{Name: "US West", ProxyURL: "http://127.0.0.1:8893", Active: true},
+		{Name: "US Houston", ProxyURL: "http://127.0.0.1:8894", Active: true},
+		{Name: "US Salt Lake City", ProxyURL: "http://127.0.0.1:8895", Active: true},
+		{Name: "US Massachusetts", ProxyURL: "http://127.0.0.1:8896", Active: true},
+		{Name: "US Oregon", ProxyURL: "http://127.0.0.1:8897", Active: true},
+		{Name: "US Virginia", ProxyURL: "http://127.0.0.1:8898", Active: true},
+		{Name: "US Ohio", ProxyURL: "http://127.0.0.1:8899", Active: true},
+		{Name: "US Michigan", ProxyURL: "http://127.0.0.1:8900", Active: true},
+		{Name: "US Pennsylvania", ProxyURL: "http://127.0.0.1:8901", Active: true},
+		{Name: "US North Carolina", ProxyURL: "http://127.0.0.1:8902", Active: true},
+		{Name: "US Idaho", ProxyURL: "http://127.0.0.1:8903", Active: true},
+		{Name: "US Alabama", ProxyURL: "http://127.0.0.1:8904", Active: true},
 	}
 
 	return &VPNPool{

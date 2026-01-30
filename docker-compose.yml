@@ -241,6 +241,246 @@ services:
       - "8892:8888"
     restart: unless-stopped
 
+  # PIA VPN - US West
+  vpn-west:
+    image: qmcgaw/gluetun
+    container_name: vpn-west
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US West
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.22
+    ports:
+      - "8893:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US Houston
+  vpn-houston:
+    image: qmcgaw/gluetun
+    container_name: vpn-houston
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US Houston
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.23
+    ports:
+      - "8894:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US Salt Lake City
+  vpn-saltlakecity:
+    image: qmcgaw/gluetun
+    container_name: vpn-saltlakecity
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US Salt Lake City
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.24
+    ports:
+      - "8895:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US Massachusetts
+  vpn-massachusetts:
+    image: qmcgaw/gluetun
+    container_name: vpn-massachusetts
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US Massachusetts
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.25
+    ports:
+      - "8896:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US Oregon
+  vpn-oregon:
+    image: qmcgaw/gluetun
+    container_name: vpn-oregon
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US Oregon
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.26
+    ports:
+      - "8897:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US Virginia
+  vpn-virginia:
+    image: qmcgaw/gluetun
+    container_name: vpn-virginia
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US Virginia
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.27
+    ports:
+      - "8898:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US Ohio
+  vpn-ohio:
+    image: qmcgaw/gluetun
+    container_name: vpn-ohio
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US Ohio
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.28
+    ports:
+      - "8899:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US Michigan
+  vpn-michigan:
+    image: qmcgaw/gluetun
+    container_name: vpn-michigan
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US Michigan
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.29
+    ports:
+      - "8900:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US Pennsylvania
+  vpn-pennsylvania:
+    image: qmcgaw/gluetun
+    container_name: vpn-pennsylvania
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US Pennsylvania
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.30
+    ports:
+      - "8901:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US North Carolina
+  vpn-northcarolina:
+    image: qmcgaw/gluetun
+    container_name: vpn-northcarolina
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US North Carolina
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.31
+    ports:
+      - "8902:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US Idaho
+  vpn-idaho:
+    image: qmcgaw/gluetun
+    container_name: vpn-idaho
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US Idaho
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.32
+    ports:
+      - "8903:8888"
+    restart: unless-stopped
+
+  # PIA VPN - US Alabama
+  vpn-alabama:
+    image: qmcgaw/gluetun
+    container_name: vpn-alabama
+    cap_add:
+      - NET_ADMIN
+    environment:
+      - VPN_SERVICE_PROVIDER=private internet access
+      - OPENVPN_USER=${PIA_USERNAME}
+      - OPENVPN_PASSWORD=${PIA_PASSWORD}
+      - SERVER_REGIONS=US Alabama
+      - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
+      - HTTPPROXY=on
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.33
+    ports:
+      - "8904:8888"
+    restart: unless-stopped
+
 networks:
   vpn_network:
     driver: bridge
