@@ -4,7 +4,7 @@ A lightweight system for hosting multiple Private Internet Access (PIA) VPN inst
 
 ## Features
 
-- 🚀 **Multiple VPN Locations**: Run 24 concurrent VPN connections across US regions
+- 🚀 **Multiple VPN Locations**: Run 50 concurrent VPN connections across US regions
 - 🔄 **Smart Routing**: Round-robin, random, or specific VPN selection
 - 🐳 **Docker-based**: Lightweight, isolated VPN containers using Gluetun
 - 🔧 **Easy Configuration**: Simple environment-based setup
