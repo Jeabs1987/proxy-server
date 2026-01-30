@@ -41,17 +41,17 @@ services:
       - "8882:8888"
     restart: unless-stopped
 
-  # PIA VPN - US New York
-  vpn-newyork:
+  # PIA VPN - US Wisconsin
+  vpn-wisconsin:
     image: qmcgaw/gluetun
-    container_name: vpn-newyork
+    container_name: vpn-wisconsin
     cap_add:
       - NET_ADMIN
     environment:
       - VPN_SERVICE_PROVIDER=private internet access
       - OPENVPN_USER=${PIA_USERNAME}
       - OPENVPN_PASSWORD=${PIA_PASSWORD}
-      - SERVER_REGIONS=US New York
+      - SERVER_REGIONS=US Wisconsin
       - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
       - HTTPPROXY=on
     networks:
@@ -281,17 +281,17 @@ services:
       - "8894:8888"
     restart: unless-stopped
 
-  # PIA VPN - US Salt Lake City
-  vpn-saltlakecity:
+  # PIA VPN - US Wyoming
+  vpn-wyoming:
     image: qmcgaw/gluetun
-    container_name: vpn-saltlakecity
+    container_name: vpn-wyoming
     cap_add:
       - NET_ADMIN
     environment:
       - VPN_SERVICE_PROVIDER=private internet access
       - OPENVPN_USER=${PIA_USERNAME}
       - OPENVPN_PASSWORD=${PIA_PASSWORD}
-      - SERVER_REGIONS=US Salt Lake City
+      - SERVER_REGIONS=US Wyoming
       - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
       - HTTPPROXY=on
     networks:
