@@ -42,7 +42,29 @@ type VPNEndpoint struct {
 	Name     string
 	ProxyURL string
 	Active   bool
+	client   *http.Client // pre-built, reused across all requests
 	mu       sync.RWMutex
+}
+
+// newEndpointClient builds a reusable HTTP client that routes through the given SOCKS/HTTP proxy.
+// Using a single long-lived client per endpoint allows connection pooling and avoids spawning
+// new transport goroutines on every request (the cause of CPU spikes under load).
+func newEndpointClient(proxyURL string) *http.Client {
+	parsedProxy, _ := url.Parse(proxyURL)
+	transport := &http.Transport{
+		Proxy:               http.ProxyURL(parsedProxy),
+		MaxIdleConns:        100,
+		MaxIdleConnsPerHost: 10,
+		IdleConnTimeout:     90 * time.Second,
+		DisableKeepAlives:   false,
+	}
+	return &http.Client{
+		Transport: transport,
+		Timeout:   30 * time.Second,
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			return http.ErrUseLastResponse
+		},
+	}
 }
 
 type VPNPool struct {
@@ -103,6 +125,12 @@ func NewVPNPool() *VPNPool {
 		{Name: "CA Toronto", ProxyURL: "http://127.0.0.1:8928", Active: true},
 		{Name: "US Vermont", ProxyURL: "http://127.0.0.1:8929", Active: true},
 		{Name: "US West Virginia", ProxyURL: "http://127.0.0.1:8930", Active: true},
+	}
+
+	// Pre-create one reusable HTTP client per endpoint so handleProxy never
+	// allocates a new transport on each request.
+	for _, ep := range endpoints {
+		ep.client = newEndpointClient(ep.ProxyURL)
 	}
 
 	return &VPNPool{
@@ -180,18 +208,11 @@ func (p *VPNPool) ListEndpoints() []*VPNEndpoint {
 
 type ProxyServer struct {
 	vpnPool *VPNPool
-	client  *http.Client
 }
 
 func NewProxyServer() *ProxyServer {
 	return &ProxyServer{
 		vpnPool: NewVPNPool(),
-		client: &http.Client{
-			Timeout: 30 * time.Second,
-			CheckRedirect: func(req *http.Request, via []*http.Request) error {
-				return http.ErrUseLastResponse
-			},
-		},
 	}
 }
 
@@ -238,21 +259,9 @@ func (s *ProxyServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 		endpoint = s.vpnPool.GetNextEndpoint()
 	}
 
-	// Create proxy URL
-	proxyURL, err := url.Parse(endpoint.ProxyURL)
-	if err != nil {
-		http.Error(w, "Invalid proxy URL: "+err.Error(), http.StatusInternalServerError)
-		return
-	}
-
-	// Create a new HTTP client with the VPN proxy
-	transport := &http.Transport{
-		Proxy: http.ProxyURL(proxyURL),
-	}
-	client := &http.Client{
-		Transport: transport,
-		Timeout:   30 * time.Second,
-	}
+	// Reuse the pre-built client for this endpoint (avoids spawning a new
+	// http.Transport and its goroutines on every request).
+	client := endpoint.client
 
 	// Create the proxied request
 	proxyReq, err := http.NewRequest(r.Method, parsedURL.String(), r.Body)
