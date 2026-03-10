@@ -277,9 +277,6 @@ func (s *ProxyServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Add info header about which VPN was used
-	log.Printf("Routing request to %s through VPN: %s", targetURL, endpoint.Name)
-
 	// Execute the request
 	resp, err := client.Do(proxyReq)
 	if err != nil {
