@@ -20,6 +20,11 @@ services:
     ports:
       - "8881:8888"  # HTTP proxy port
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US California
   vpn-california:
@@ -40,6 +45,11 @@ services:
     ports:
       - "8882:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Wisconsin
   vpn-wisconsin:
@@ -60,6 +70,11 @@ services:
     ports:
       - "8883:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Texas
   vpn-texas:
@@ -80,6 +95,11 @@ services:
     ports:
       - "8884:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Chicago
   vpn-chicago:
@@ -100,6 +120,11 @@ services:
     ports:
       - "8885:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Seattle
   vpn-seattle:
@@ -120,6 +145,11 @@ services:
     ports:
       - "8886:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Denver
   vpn-denver:
@@ -140,6 +170,11 @@ services:
     ports:
       - "8887:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Atlanta
   vpn-atlanta:
@@ -160,6 +195,11 @@ services:
     ports:
       - "8888:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Las Vegas
   vpn-lasvegas:
@@ -180,6 +220,11 @@ services:
     ports:
       - "8889:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Washington DC
   vpn-washingtondc:
@@ -200,6 +245,11 @@ services:
     ports:
       - "8890:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Silicon Valley
   vpn-siliconvalley:
@@ -220,6 +270,11 @@ services:
     ports:
       - "8891:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US East
   vpn-east:
@@ -240,6 +295,11 @@ services:
     ports:
       - "8892:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US West
   vpn-west:
@@ -260,6 +320,11 @@ services:
     ports:
       - "8893:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Houston
   vpn-houston:
@@ -280,6 +345,11 @@ services:
     ports:
       - "8894:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Wyoming
   vpn-wyoming:
@@ -300,6 +370,11 @@ services:
     ports:
       - "8895:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Massachusetts
   vpn-massachusetts:
@@ -320,6 +395,11 @@ services:
     ports:
       - "8896:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Oregon
   vpn-oregon:
@@ -340,6 +420,11 @@ services:
     ports:
       - "8897:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Virginia
   vpn-virginia:
@@ -360,6 +445,11 @@ services:
     ports:
       - "8898:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Ohio
   vpn-ohio:
@@ -380,6 +470,11 @@ services:
     ports:
       - "8899:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Michigan
   vpn-michigan:
@@ -400,6 +495,11 @@ services:
     ports:
       - "8900:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Pennsylvania
   vpn-pennsylvania:
@@ -420,6 +520,11 @@ services:
     ports:
       - "8901:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US North Carolina
   vpn-northcarolina:
@@ -440,6 +545,11 @@ services:
     ports:
       - "8902:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Idaho
   vpn-idaho:
@@ -460,6 +570,11 @@ services:
     ports:
       - "8903:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Alabama
   vpn-alabama:
@@ -480,6 +595,11 @@ services:
     ports:
       - "8904:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Alaska
   vpn-alaska:
@@ -500,6 +620,11 @@ services:
     ports:
       - "8905:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Arkansas
   vpn-arkansas:
@@ -520,6 +645,11 @@ services:
     ports:
       - "8906:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Baltimore
   vpn-baltimore:
@@ -540,6 +670,11 @@ services:
     ports:
       - "8907:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Connecticut
   vpn-connecticut:
@@ -560,6 +695,11 @@ services:
     ports:
       - "8908:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Wilmington
   vpn-wilmington:
@@ -580,6 +720,11 @@ services:
     ports:
       - "8909:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US East Streaming Optimized
   vpn-east-streaming:
@@ -600,6 +745,11 @@ services:
     ports:
       - "8910:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Iowa
   vpn-iowa:
@@ -620,6 +770,11 @@ services:
     ports:
       - "8911:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Kansas
   vpn-kansas:
@@ -640,6 +795,11 @@ services:
     ports:
       - "8912:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US West Streaming Optimized
   vpn-west-streaming:
@@ -660,6 +820,11 @@ services:
     ports:
       - "8913:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Louisiana
   vpn-louisiana:
@@ -680,6 +845,11 @@ services:
     ports:
       - "8914:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Maine
   vpn-maine:
@@ -700,6 +870,11 @@ services:
     ports:
       - "8915:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Minnesota
   vpn-minnesota:
@@ -720,6 +895,11 @@ services:
     ports:
       - "8916:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Mississippi
   vpn-mississippi:
@@ -740,6 +920,11 @@ services:
     ports:
       - "8917:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Missouri
   vpn-missouri:
@@ -760,6 +945,11 @@ services:
     ports:
       - "8918:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Montana
   vpn-montana:
@@ -780,6 +970,11 @@ services:
     ports:
       - "8919:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Nebraska
   vpn-nebraska:
@@ -800,6 +995,11 @@ services:
     ports:
       - "8920:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US New Hampshire
   vpn-newhampshire:
@@ -820,6 +1020,11 @@ services:
     ports:
       - "8921:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US New Mexico
   vpn-newmexico:
@@ -840,6 +1045,11 @@ services:
     ports:
       - "8922:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US North Dakota
   vpn-northdakota:
@@ -860,6 +1070,11 @@ services:
     ports:
       - "8923:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Oklahoma
   vpn-oklahoma:
@@ -880,6 +1095,11 @@ services:
     ports:
       - "8924:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Rhode Island
   vpn-rhodeisland:
@@ -900,6 +1120,11 @@ services:
     ports:
       - "8925:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US South Carolina
   vpn-southcarolina:
@@ -920,6 +1145,11 @@ services:
     ports:
       - "8926:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US South Dakota
   vpn-southdakota:
@@ -940,6 +1170,11 @@ services:
     ports:
       - "8927:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - CA Toronto
   vpn-toronto:
@@ -960,6 +1195,11 @@ services:
     ports:
       - "8928:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US Vermont
   vpn-vermont:
@@ -980,6 +1220,11 @@ services:
     ports:
       - "8929:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
   # PIA VPN - US West Virginia
   vpn-westvirginia:
@@ -1000,6 +1245,11 @@ services:
     ports:
       - "8930:8888"
     restart: unless-stopped
+    healthcheck:
+      interval: 2m
+      timeout: 30s
+      start_period: 40s
+      retries: 3
 
 networks:
   vpn_network:
