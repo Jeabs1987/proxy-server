@@ -79,25 +79,82 @@ For applications deployed to test subdomains (e.g., `test.agar3d.io`), the follo
     -   This viewer expects the API endpoints above to be available relative to the root.
 
 ## Payment Integration
-The infrastructure includes a unified payment service (`payment-service`) for handling Stripe checkouts.
+The infrastructure includes a unified payment service (`payment-service`) for handling Stripe checkouts and subscriptions.
 
 ### Service Details
 - **Internal URL:** `http://localhost:8089` (accessible from other apps on the VPS)
 - **External URL:** `https://payments.armadainteractive.co`
 
-### Workflow
-1.  **Create Session:** Make a POST request to `/checkout` with the following JSON:
+### One-time Payments
+1.  **Create Session:** Make a POST request to `/checkout`:
     ```json
     {
       "app_id": "your-app-name",
       "price_id": "price_...", // OR amount (int cents), currency, product_name
       "success_url": "https://your-app.com/success",
       "cancel_url": "https://your-app.com/cancel",
-      "metadata": { "user_id": "123" } // Optional custom data
+      "metadata": { "user_id": "123" }
     }
     ```
-2.  **Redirect:** The response contains `{"url": "..."}`. Redirect the user to this Stripe URL.
+2.  **Redirect:** Response contains `{"url": "..."}`. Redirect the user to this Stripe URL.
 3.  **Verify:** Poll `GET /transaction?id=<session_id>` to check status (`paid`, `pending`, `expired`).
+
+### Subscriptions
+Subscriptions require a recurring **Price ID** created in the Stripe Dashboard:
+- Dashboard → Products → Create Product → Add a Price with recurring billing
+- This gives you a `price_id` like `price_1ABC...`
+- Create separate prices for different plans/intervals (e.g. monthly, yearly)
+
+**1. Create a subscription checkout session:**
+```json
+POST /checkout
+{
+  "app_id": "your-app-name",
+  "mode": "subscription",
+  "price_id": "price_...",
+  "success_url": "https://your-app.com/success",
+  "cancel_url": "https://your-app.com/cancel",
+  "metadata": { "user_id": "123" }
+}
+```
+Response:
+```json
+{ "session_id": "cs_...", "url": "https://checkout.stripe.com/..." }
+```
+Redirect the user to the URL. After checkout, the `subscription_id` (`sub_...`) is available via the `customer.subscription.created` webhook — store it alongside the user in your own database.
+
+**2. Check subscription status:**
+```
+GET /subscription?id=<subscription_id>
+```
+Returns: `id`, `status` (`active`, `past_due`, `canceled`, etc.), `price_id`, `current_period_end`, `cancel_at_period_end`.
+
+**3. List subscriptions for your app:**
+```
+GET /subscriptions?app_id=<your-app-name>
+```
+
+**4. Cancel a subscription:**
+```json
+POST /subscription/cancel
+{
+  "subscription_id": "sub_...",
+  "at_period_end": true
+}
+```
+- `at_period_end: true` — stays active until the end of the billing period (recommended)
+- `at_period_end: false` — cancels immediately
+
+### Subscription Status Lifecycle
+| Status | Meaning |
+|--------|---------|
+| `active` | Subscription is active and billing normally |
+| `past_due` | Latest invoice payment failed, Stripe is retrying |
+| `canceled` | Subscription has been canceled |
+| `unpaid` | Payment retries exhausted |
+| `trialing` | In a free trial period |
+
+Your app should gate access based on status being `active` (or `trialing` if you offer trials). Poll `/subscription?id=<sub_id>` to check the current status on demand.
 
 ## Troubleshooting
 - **Deployment Loop:** If the server keeps rebuilding, check if `main` or `dist/` files are being tracked by git. Remove them with `git rm --cached <file>`.
