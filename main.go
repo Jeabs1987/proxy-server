@@ -6,12 +6,87 @@ import (
 	"io"
 	"log"
 	"math/rand"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
+	"strings"
 	"sync"
 	"time"
 )
+
+// privateNetworks contains CIDR ranges that must never be proxied to (SSRF protection).
+var privateNetworks []*net.IPNet
+
+func init() {
+	for _, cidr := range []string{
+		"127.0.0.0/8",
+		"10.0.0.0/8",
+		"172.16.0.0/12",
+		"192.168.0.0/16",
+		"169.254.0.0/16",
+		"::1/128",
+		"fc00::/7",
+		"fe80::/10",
+	} {
+		_, network, _ := net.ParseCIDR(cidr)
+		privateNetworks = append(privateNetworks, network)
+	}
+}
+
+func isPrivateIP(host string) bool {
+	// Strip port if present
+	h, _, err := net.SplitHostPort(host)
+	if err != nil {
+		h = host
+	}
+
+	ips, err := net.LookupIP(h)
+	if err != nil {
+		// If we can't resolve, block it to be safe
+		return true
+	}
+
+	for _, ip := range ips {
+		for _, network := range privateNetworks {
+			if network.Contains(ip) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// sensitiveHeaders are stripped before forwarding requests to targets.
+var sensitiveHeaders = map[string]bool{
+	"cookie":        true,
+	"authorization": true,
+	"x-api-key":     true,
+	"set-cookie":    true,
+	"proxy-authorization": true,
+}
+
+func requireAPIKey(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		apiKey := os.Getenv("API_KEY")
+		if apiKey == "" {
+			// No key configured — deny all to avoid open proxy
+			http.Error(w, "Service unavailable", http.StatusServiceUnavailable)
+			return
+		}
+
+		key := r.Header.Get("X-Api-Key")
+		if key == "" {
+			key = r.URL.Query().Get("api_key")
+		}
+
+		if key != apiKey {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+		next(w, r)
+	}
+}
 
 type LogBuffer struct {
 	mu      sync.Mutex
@@ -235,6 +310,18 @@ func (s *ProxyServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 		parsedURL.Scheme = "https"
 	}
 
+	// Only allow http/https schemes
+	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+		http.Error(w, "Only http and https schemes are allowed", http.StatusBadRequest)
+		return
+	}
+
+	// SSRF protection: block requests to private/internal networks
+	if isPrivateIP(parsedURL.Host) {
+		http.Error(w, "Requests to private/internal networks are not allowed", http.StatusForbidden)
+		return
+	}
+
 	// Select VPN endpoint based on routing strategy
 	strategy := r.URL.Query().Get("strategy")
 	vpnName := r.URL.Query().Get("vpn")
@@ -270,8 +357,11 @@ func (s *ProxyServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Copy headers
+	// Copy headers, stripping sensitive ones
 	for key, values := range r.Header {
+		if sensitiveHeaders[strings.ToLower(key)] {
+			continue
+		}
 		for _, value := range values {
 			proxyReq.Header.Add(key, value)
 		}
@@ -294,7 +384,6 @@ func (s *ProxyServer) handleProxy(w http.ResponseWriter, r *http.Request) {
 
 	// Add custom header to indicate which VPN was used
 	w.Header().Set("X-VPN-Used", endpoint.Name)
-	w.Header().Set("X-VPN-Proxy", endpoint.ProxyURL)
 
 	// Copy status code
 	w.WriteHeader(resp.StatusCode)
@@ -307,28 +396,24 @@ func (s *ProxyServer) handleStatus(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 
 	endpoints := s.vpnPool.ListEndpoints()
-	fmt.Fprintf(w, "{\n")
-	fmt.Fprintf(w, "  \"endpoints\": [\n")
 
-	for i, ep := range endpoints {
+	type endpointStatus struct {
+		Name   string `json:"name"`
+		Active bool   `json:"active"`
+	}
+	type statusResponse struct {
+		Endpoints []endpointStatus `json:"endpoints"`
+	}
+
+	resp := statusResponse{}
+	for _, ep := range endpoints {
 		ep.mu.RLock()
 		active := ep.Active
 		ep.mu.RUnlock()
-
-		comma := ","
-		if i == len(endpoints)-1 {
-			comma = ""
-		}
-
-		fmt.Fprintf(w, "    {\n")
-		fmt.Fprintf(w, "      \"name\": \"%s\",\n", ep.Name)
-		fmt.Fprintf(w, "      \"proxy\": \"%s\",\n", ep.ProxyURL)
-		fmt.Fprintf(w, "      \"active\": %t\n", active)
-		fmt.Fprintf(w, "    }%s\n", comma)
+		resp.Endpoints = append(resp.Endpoints, endpointStatus{Name: ep.Name, Active: active})
 	}
 
-	fmt.Fprintf(w, "  ]\n")
-	fmt.Fprintf(w, "}\n")
+	json.NewEncoder(w).Encode(resp)
 }
 
 func (s *ProxyServer) handleRoot(w http.ResponseWriter, r *http.Request) {
@@ -396,20 +481,20 @@ func main() {
 	server := NewProxyServer()
 
 	http.HandleFunc("/", server.handleRoot)
-	http.HandleFunc("/proxy", server.handleProxy)
-	http.HandleFunc("/status", server.handleStatus)
+	http.HandleFunc("/proxy", requireAPIKey(server.handleProxy))
+	http.HandleFunc("/status", requireAPIKey(server.handleStatus))
 
 	// Logging and Restart endpoints for compliance
 	logBuf := &LogBuffer{maxSize: 1000}
 	mw := io.MultiWriter(os.Stdout, logBuf)
 	log.SetOutput(mw)
 
-	http.HandleFunc("/api/logs/server", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/logs/server", requireAPIKey(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		json.NewEncoder(w).Encode(logBuf.GetLogs())
-	})
+	}))
 
-	http.HandleFunc("/api/server/restart", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/api/server/restart", requireAPIKey(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != http.MethodPost {
 			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 			return
@@ -422,7 +507,7 @@ func main() {
 			time.Sleep(100 * time.Millisecond)
 			os.Exit(0)
 		}()
-	})
+	}))
 
 	port := os.Getenv("PORT")
 	if port == "" {
