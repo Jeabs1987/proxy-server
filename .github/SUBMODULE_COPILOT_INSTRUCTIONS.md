@@ -156,6 +156,117 @@ POST /subscription/cancel
 
 Your app should gate access based on status being `active` (or `trialing` if you offer trials). Poll `/subscription?id=<sub_id>` to check the current status on demand.
 
+## Image Generation (AI)
+The infrastructure includes a centralized image generation service via `llm-core` (`llm.jeab.dev`), powered by OpenAI's API. Use this instead of embedding API keys in individual apps.
+
+### Service Details
+- **Internal URL:** `http://localhost:8083` (accessible from other apps on the VPS)
+- **External URL:** `https://llm.jeab.dev`
+- **Auth:** Include `X-API-Key` header with the `LLM_API_KEY` value, OR call from a `*.jeab.dev` / `localhost` origin.
+
+### Generate Image
+Create images from text prompts using DALL-E 3, DALL-E 2, or GPT Image 1.
+
+- **Endpoint:** `POST /api/image/generate`
+- **Content-Type:** `application/json`
+
+#### Request Body
+```json
+{
+  "prompt": "A pixel-art treasure chest icon, 64x64, transparent background",
+  "model": "gpt-image-1",
+  "size": "1024x1024",
+  "quality": "hd",
+  "style": "natural",
+  "n": 1,
+  "response_format": "b64_json",
+  "background": "transparent",
+  "output_format": "png"
+}
+```
+
+#### Parameters
+| Parameter | Required | Default | Values |
+|-----------|----------|---------|--------|
+| `prompt` | Yes | — | Text description of the image |
+| `model` | No | `gpt-image-1` | `gpt-image-1`, `dall-e-3`, `dall-e-2` |
+| `n` | No | 1 | 1-10 (DALL-E 3 only supports 1) |
+| `size` | No | `1024x1024` | `1024x1024`, `1792x1024`, `1024x1792`, `256x256`, `512x512` |
+| `quality` | No | `standard` | `standard`, `hd` (DALL-E 3 only) |
+| `style` | No | `vivid` | `vivid`, `natural` (DALL-E 3 only) |
+| `response_format` | No | `b64_json` | `url`, `b64_json` |
+| `background` | No | — | `transparent`, `opaque`, `auto` (gpt-image-1 only) |
+| `output_format` | No | — | `png`, `jpeg`, `webp` (gpt-image-1 only) |
+
+#### Response
+```json
+{
+  "created": 1234567890,
+  "data": [
+    {
+      "b64_json": "<base64-encoded image data>",
+      "revised_prompt": "A detailed pixel-art treasure chest..."
+    }
+  ]
+}
+```
+
+### Edit Image (Inpainting)
+Modify an existing image with a prompt. Useful for adding/removing elements.
+
+- **Endpoint:** `POST /api/image/edit`
+- **Content-Type:** `application/json`
+
+#### Request Body
+```json
+{
+  "image": "<base64-encoded source image>",
+  "prompt": "Replace the background with a starry night sky",
+  "mask": "<base64-encoded mask (optional, white=edit area)>",
+  "model": "gpt-image-1",
+  "size": "1024x1024",
+  "n": 1,
+  "response_format": "b64_json"
+}
+```
+
+### Usage Examples
+
+**Game sprites (e.g., from agar3d, kidgame):**
+```javascript
+const response = await fetch('https://llm.jeab.dev/api/image/generate', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'X-API-Key': process.env.LLM_API_KEY
+  },
+  body: JSON.stringify({
+    prompt: 'A cute cartoon fish character, side view, game sprite, transparent background, pixel art style',
+    model: 'gpt-image-1',
+    size: '1024x1024',
+    background: 'transparent',
+    output_format: 'png',
+    response_format: 'b64_json'
+  })
+});
+const { data } = await response.json();
+const imageBuffer = Buffer.from(data[0].b64_json, 'base64');
+```
+
+**Go backend usage:**
+```go
+resp, err := http.Post("http://localhost:8083/api/image/generate",
+    "application/json",
+    strings.NewReader(`{"prompt":"Icon for a health potion","model":"gpt-image-1","size":"256x256","background":"transparent","output_format":"png"}`))
+```
+
+### Best Practices
+- Use `response_format: "b64_json"` to get the image data directly (URLs expire after 1 hour).
+- Use `gpt-image-1` for sprites/icons that need transparent backgrounds.
+- Use `dall-e-3` when you need the highest artistic quality and don't need transparency.
+- Cache generated images locally — don't re-generate the same asset repeatedly.
+- For batch generation (e.g., generating all game icons at build time), call sequentially to avoid rate limits.
+
 ## Troubleshooting
 - **Deployment Loop:** If the server keeps rebuilding, check if `main` or `dist/` files are being tracked by git. Remove them with `git rm --cached <file>`.
 - **Port Conflicts:** Ensure you are using `os.Getenv("PORT")`.
