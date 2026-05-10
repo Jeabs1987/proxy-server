@@ -22,9 +22,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -50,9 +51,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -78,9 +80,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -106,9 +109,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -134,9 +138,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -162,9 +167,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -190,9 +196,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -218,9 +225,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -246,9 +254,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -274,9 +283,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -302,9 +312,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -330,9 +341,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -358,9 +370,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -386,9 +399,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -414,9 +428,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -442,9 +457,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -470,9 +486,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -498,9 +515,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -526,9 +544,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -554,9 +573,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -582,9 +602,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -610,9 +631,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -638,9 +660,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -666,9 +689,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -694,9 +718,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -722,9 +747,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -750,9 +776,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -778,9 +805,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -806,9 +834,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -834,9 +863,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -862,9 +892,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -890,9 +921,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -918,9 +950,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -946,9 +979,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -974,9 +1008,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -1002,9 +1037,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -1030,9 +1066,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -1058,9 +1095,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -1086,9 +1124,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -1114,9 +1153,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -1142,9 +1182,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -1170,9 +1211,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -1198,9 +1240,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -1226,9 +1269,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -1254,9 +1298,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -1282,9 +1327,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -1310,9 +1356,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -1338,9 +1385,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -1366,9 +1414,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
@@ -1394,9 +1443,10 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
+    cpus: 0.10
     init: true
     healthcheck:
-      interval: 2m
+      interval: 5m
       timeout: 30s
       start_period: 40s
       retries: 3
