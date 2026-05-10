@@ -61,6 +61,7 @@ services:
 
   # PIA VPN - US Wisconsin
   vpn-wisconsin:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-wisconsin
     cap_add:
@@ -409,6 +410,7 @@ services:
 
   # PIA VPN - US Wyoming
   vpn-wyoming:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-wyoming
     cap_add:
@@ -525,6 +527,7 @@ services:
 
   # PIA VPN - US Ohio
   vpn-ohio:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-ohio
     cap_add:
@@ -554,6 +557,7 @@ services:
 
   # PIA VPN - US Michigan
   vpn-michigan:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-michigan
     cap_add:
@@ -612,6 +616,7 @@ services:
 
   # PIA VPN - US North Carolina
   vpn-northcarolina:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-northcarolina
     cap_add:
@@ -641,6 +646,7 @@ services:
 
   # PIA VPN - US Idaho
   vpn-idaho:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-idaho
     cap_add:
@@ -670,6 +676,7 @@ services:
 
   # PIA VPN - US Alabama
   vpn-alabama:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-alabama
     cap_add:
@@ -699,6 +706,7 @@ services:
 
   # PIA VPN - US Alaska
   vpn-alaska:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-alaska
     cap_add:
@@ -728,6 +736,7 @@ services:
 
   # PIA VPN - US Arkansas
   vpn-arkansas:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-arkansas
     cap_add:
@@ -757,6 +766,7 @@ services:
 
   # PIA VPN - US Baltimore
   vpn-baltimore:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-baltimore
     cap_add:
@@ -786,6 +796,7 @@ services:
 
   # PIA VPN - US Connecticut
   vpn-connecticut:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-connecticut
     cap_add:
@@ -815,6 +826,7 @@ services:
 
   # PIA VPN - US Wilmington
   vpn-wilmington:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-wilmington
     cap_add:
@@ -873,6 +885,7 @@ services:
 
   # PIA VPN - US Iowa
   vpn-iowa:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-iowa
     cap_add:
@@ -902,6 +915,7 @@ services:
 
   # PIA VPN - US Kansas
   vpn-kansas:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-kansas
     cap_add:
@@ -960,6 +974,7 @@ services:
 
   # PIA VPN - US Louisiana
   vpn-louisiana:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-louisiana
     cap_add:
@@ -989,6 +1004,7 @@ services:
 
   # PIA VPN - US Maine
   vpn-maine:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-maine
     cap_add:
@@ -1018,6 +1034,7 @@ services:
 
   # PIA VPN - US Minnesota
   vpn-minnesota:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-minnesota
     cap_add:
@@ -1047,6 +1064,7 @@ services:
 
   # PIA VPN - US Mississippi
   vpn-mississippi:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-mississippi
     cap_add:
@@ -1076,6 +1094,7 @@ services:
 
   # PIA VPN - US Missouri
   vpn-missouri:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-missouri
     cap_add:
@@ -1105,6 +1124,7 @@ services:
 
   # PIA VPN - US Montana
   vpn-montana:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-montana
     cap_add:
@@ -1134,6 +1154,7 @@ services:
 
   # PIA VPN - US Nebraska
   vpn-nebraska:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-nebraska
     cap_add:
@@ -1163,6 +1184,7 @@ services:
 
   # PIA VPN - US New Hampshire
   vpn-newhampshire:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-newhampshire
     cap_add:
@@ -1192,6 +1214,7 @@ services:
 
   # PIA VPN - US New Mexico
   vpn-newmexico:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-newmexico
     cap_add:
@@ -1221,6 +1244,7 @@ services:
 
   # PIA VPN - US North Dakota
   vpn-northdakota:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-northdakota
     cap_add:
@@ -1250,6 +1274,7 @@ services:
 
   # PIA VPN - US Oklahoma
   vpn-oklahoma:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-oklahoma
     cap_add:
@@ -1279,6 +1304,7 @@ services:
 
   # PIA VPN - US Rhode Island
   vpn-rhodeisland:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-rhodeisland
     cap_add:
@@ -1308,6 +1334,7 @@ services:
 
   # PIA VPN - US South Carolina
   vpn-southcarolina:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-southcarolina
     cap_add:
@@ -1337,6 +1364,7 @@ services:
 
   # PIA VPN - US South Dakota
   vpn-southdakota:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-southdakota
     cap_add:
@@ -1395,6 +1423,7 @@ services:
 
   # PIA VPN - US Vermont
   vpn-vermont:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-vermont
     cap_add:
@@ -1424,6 +1453,7 @@ services:
 
   # PIA VPN - US West Virginia
   vpn-westvirginia:
+    profiles: ["disabled"]
     image: qmcgaw/gluetun
     container_name: vpn-westvirginia
     cap_add:
