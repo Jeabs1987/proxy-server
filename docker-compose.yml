@@ -22,7 +22,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -51,7 +51,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -81,7 +81,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -110,7 +110,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -139,7 +139,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -168,7 +168,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -197,7 +197,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -226,7 +226,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -255,7 +255,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -284,7 +284,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -313,7 +313,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -342,7 +342,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -371,7 +371,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -400,7 +400,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -430,7 +430,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -459,7 +459,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -488,7 +488,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -517,7 +517,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -547,7 +547,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -577,7 +577,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -606,7 +606,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -636,7 +636,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -666,7 +666,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -696,7 +696,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -726,7 +726,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -756,7 +756,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -786,7 +786,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -816,7 +816,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -846,7 +846,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -875,7 +875,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -905,7 +905,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -935,7 +935,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -964,7 +964,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -994,7 +994,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -1024,7 +1024,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -1054,7 +1054,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -1084,7 +1084,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -1114,7 +1114,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -1144,7 +1144,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -1174,7 +1174,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -1204,7 +1204,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -1234,7 +1234,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -1264,7 +1264,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -1294,7 +1294,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -1324,7 +1324,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -1354,7 +1354,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -1384,7 +1384,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -1413,7 +1413,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -1443,7 +1443,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
@@ -1473,7 +1473,7 @@ services:
     restart: unless-stopped
     mem_limit: 256m
     memswap_limit: 256m
-    cpus: 0.10
+    cpus: 0.50
     init: true
     healthcheck:
       interval: 5m
