@@ -20,7 +20,8 @@ node_modules/
 go.work
 
 # IDE
-.vscode/
+.vscode/*
+!.vscode/settings.json
 .idea/
 *.swp
 *.swo

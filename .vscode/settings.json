@@ -1,0 +1,16 @@
+{
+  "peacock.color": "#4a5260",
+  "peacock.affectActivityBar": false,
+  "workbench.colorCustomizations": {
+    "titleBar.activeBackground": "#4a5260",
+    "titleBar.activeForeground": "#e6e6e6",
+    "titleBar.inactiveBackground": "#4a5260",
+    "titleBar.inactiveForeground": "#bdbdbd",
+    "activityBar.activeBorder": "#4a5260",
+    "statusBar.background": "#4a5260",
+    "statusBar.foreground": "#e6e6e6",
+    "statusBar.noFolderBackground": "#4a5260",
+    "statusBarItem.remoteBackground": "#333944",
+    "statusBarItem.remoteForeground": "#e6e6e6"
+  }
+}
