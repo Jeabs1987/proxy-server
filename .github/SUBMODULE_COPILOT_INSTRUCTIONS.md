@@ -156,6 +156,9 @@ POST /subscription/cancel
 
 Your app should gate access based on status being `active` (or `trialing` if you offer trials). Poll `/subscription?id=<sub_id>` to check the current status on demand.
 
+### Statement Descriptors
+Charges from `payment-service` carry a per-app suffix on the customer's card statement, rendered as `ARMADA* <SUFFIX>` (Stripe caps the combined string at 22 chars). The suffix is resolved by `payment-service` from env var `STRIPE_DESCRIPTOR_<APPID>` (uppercase, hyphens stripped) — **no app code change required**. Apps without a configured value inherit the account default. Subscriptions inherit the account default only; per-subscription descriptors are set on the Stripe Price/Product in the Dashboard, not in code.
+
 ## Image Generation (AI)
 The infrastructure includes a centralized image generation service via `llm-core` (`llm.jeab.dev`). Requests are routed through the shared openclaw OpenAI OAuth account — **there is no per-app billing cost**. Use this instead of embedding OpenAI API keys in individual apps.
 
