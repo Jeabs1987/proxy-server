@@ -79,85 +79,71 @@ For applications deployed to test subdomains (e.g., `test.agar3d.io`), the follo
     -   This viewer expects the API endpoints above to be available relative to the root.
 
 ## Payment Integration
-The infrastructure includes a unified payment service (`payment-service`) for handling Stripe checkouts and subscriptions.
+The infrastructure includes a unified payment service (`payment-service`) that owns **all** Stripe checkout for the portfolio — **both one-time payments and recurring subscriptions** — plus optional per-app Checkout branding. Apps never embed Stripe keys: they call `/checkout`, implement the entitlement callbacks below, and let payment-service drive Stripe. (The `nurses-compass` NCLEX flow is the reference integration.)
 
 ### Service Details
 - **Internal URL:** `http://localhost:8089` (accessible from other apps on the VPS)
 - **External URL:** `https://payments.armadainteractive.co`
 
 ### One-time Payments
-1.  **Create Session:** Make a POST request to `/checkout`:
+1.  **Create Session:** Make a POST request to `/checkout` (omit `mode`, or pass `"mode": "payment"`):
     ```json
     {
       "app_id": "your-app-name",
       "price_id": "price_...", // OR amount (int cents), currency, product_name
       "success_url": "https://your-app.com/success",
       "cancel_url": "https://your-app.com/cancel",
-      "metadata": { "user_id": "123" }
+      "metadata": { "app_id": "your-app-name", "user_id": "123", "product_id": "premium" }
     }
     ```
-2.  **Redirect:** Response contains `{"url": "..."}`. Redirect the user to this Stripe URL.
+    `/checkout` is public and **rate-limited at the edge** (a few req/sec per IP) — call it for genuine, user-initiated checkout only, never in a loop. For an embedded flow, send `"ui_mode": "embedded"` + `return_url` and read `client_secret` from the response instead of redirecting.
+2.  **Redirect:** Response contains `{"session_id": "cs_...", "url": "..."}`. Redirect the user to the Stripe URL.
 3.  **Verify:** Poll `GET /transaction?id=<session_id>` to check status (`paid`, `pending`, `expired`).
 
-### Subscriptions
-Subscriptions require a recurring **Price ID** created in the Stripe Dashboard:
-- Dashboard → Products → Create Product → Add a Price with recurring billing
-- This gives you a `price_id` like `price_1ABC...`
-- Create separate prices for different plans/intervals (e.g. monthly, yearly)
+For one-time payments payment-service is **verify-only** — it does not grant access itself. Your app grants from its own success/webhook flow and answers `POST /api/entitlements/verify` (read-only) so the service can confirm delivery. See [ENTITLEMENTS_VERIFY_CONTRACT.md](ENTITLEMENTS_VERIFY_CONTRACT.md).
 
-**1. Create a subscription checkout session:**
+### Subscriptions
+Send `"mode": "subscription"` to `/checkout` with **either** a pre-made Stripe `price_id` **or** an inline recurring price (`amount` cents + `currency` + `interval` `"month"`/`"year"` (default `"month"`) + `product_name`):
 ```json
-POST /checkout
 {
   "app_id": "your-app-name",
   "mode": "subscription",
-  "price_id": "price_...",
+  "amount": 1499,
+  "currency": "usd",
+  "interval": "month",
+  "product_name": "Monthly Plan",
   "success_url": "https://your-app.com/success",
   "cancel_url": "https://your-app.com/cancel",
-  "metadata": { "user_id": "123" }
+  "metadata": { "app_id": "your-app-name", "user_id": "123", "product_id": "monthly" }
 }
 ```
-Response:
-```json
-{ "session_id": "cs_...", "url": "https://checkout.stripe.com/..." }
-```
-Redirect the user to the URL. After checkout, the `subscription_id` (`sub_...`) is available via the `customer.subscription.created` webhook — store it alongside the user in your own database.
+`metadata` is propagated onto **both** the Checkout Session and `subscription_data.metadata`, so renewal/cancel webhooks (which have no user present) can still route back to the owning app. Always include `app_id`, `user_id`, and `product_id` in subscription `metadata`.
 
-**2. Check subscription status:**
-```
-GET /subscription?id=<subscription_id>
-```
-Returns: `id`, `status` (`active`, `past_due`, `canceled`, etc.), `price_id`, `current_period_end`, `cancel_at_period_end`.
+**Subscription lifecycle is delivered by PUSH, not poll.** payment-service receives the Stripe subscription/invoice webhooks, persists them, and **calls** your app at `POST /api/entitlements/subscription` for each lifecycle change (activate / renew / update / payment-failed / cancel). Unlike read-only verify, **this endpoint mutates your app's entitlement state**. Every app that sells subscriptions must implement it — see the "Subscription lifecycle" section of [ENTITLEMENTS_VERIFY_CONTRACT.md](ENTITLEMENTS_VERIFY_CONTRACT.md) for the event list, body schema, status codes, and idempotency rules.
 
-**3. List subscriptions for your app:**
+### Reversals (refund / chargeback / fraud)
+When a Stripe **refund**, **chargeback** (dispute), or **early-fraud-warning** lands, payment-service **pushes** it to your app at `POST /api/entitlements/reversal` (server-to-server, same `X-Internal-Token` auth, derived from `ENTITLEMENT_VERIFY_URL_<APPID>` by swapping the path). This covers **both** one-time charges and subscription charges. **Any app that sells anything must implement it** to revoke access on money-back events. The events are `refunded` / `chargeback_opened` / `chargeback_lost` / `fraud_warning` → **REVOKE** that purchase's entitlement immediately, and `chargeback_won` → **RESTORE** it. This is the opposite of a subscription `canceled` (which keeps already-paid time): a reversal means the money is gone or held, so access is pulled now. The push payload's top-level `product_id` is **your internal product key** (e.g. `nclex-monthly`), not a Stripe `prod_…` id. ⚠️ There is **no reconciliation pull** for reversals, so the receiver must be deployed **before** payment-service starts sending. Full contract (body schema, status codes, idempotency key `(charge_id, event)`): the "Reversals" section of [ENTITLEMENTS_VERIFY_CONTRACT.md](ENTITLEMENTS_VERIFY_CONTRACT.md).
+
+### Checkout branding
+Configure per-app Stripe Checkout branding by setting env var `STRIPE_BRANDING_<APPID>` to a JSON object (keys: `display_name`, `background_color`, `button_color`, `border_style`, `font_family`, `logo_url`, `icon_url`). Branding applies to **hosted** checkout only — Stripe rejects branding on `embedded`/`custom` ui_mode, so it is skipped there. No app code change is required; the service reads the env var by `app_id`.
+
+### Reading `/transaction` — customer PII is token-gated
+`GET /transaction?id=<session_id>` always returns the non-sensitive fields to any caller, so unauthenticated status polling keeps working: `id`, `app_id`, `amount`, `currency`, `status`, `created_at`.
+
+The customer **`email`** and the **`metadata`** object (which carries the `user_id` you set at checkout) are returned **only when the request carries a valid internal token**:
+
 ```
-GET /subscriptions?app_id=<your-app-name>
+GET /transaction?id=cs_...
+X-Internal-Token: <ENTITLEMENTS_VERIFY_TOKEN>
 ```
 
-**4. Cancel a subscription:**
-```json
-POST /subscription/cancel
-{
-  "subscription_id": "sub_...",
-  "at_period_end": true
-}
-```
-- `at_period_end: true` — stays active until the end of the billing period (recommended)
-- `at_period_end: false` — cancels immediately
+Without the header (or with a wrong token) the response is still `200`, but `email` is `""` and `metadata` is `{}`. **Any server-to-server flow that needs the buyer's email or your `user_id` back (to deliver a product or unlock an account) must send `X-Internal-Token`.** The value is the shared `ENTITLEMENTS_VERIFY_TOKEN` in `/etc/reverse-proxy/secrets.env` — the same secret your `/api/entitlements/verify` endpoint already loads. It is a server-side secret; never send it from the browser (`/transaction` is a backend-to-backend call).
 
-### Subscription Status Lifecycle
-| Status | Meaning |
-|--------|---------|
-| `active` | Subscription is active and billing normally |
-| `past_due` | Latest invoice payment failed, Stripe is retrying |
-| `canceled` | Subscription has been canceled |
-| `unpaid` | Payment retries exhausted |
-| `trialing` | In a free trial period |
-
-Your app should gate access based on status being `active` (or `trialing` if you offer trials). Poll `/subscription?id=<sub_id>` to check the current status on demand.
+### Confirming delivery (entitlements verify)
+After a paid one-time checkout, `payment-service` calls your app's `POST /api/entitlements/verify` (server-to-server, `X-Internal-Token`-authenticated, **read-only**) to confirm the unlock landed and flip the Discord sale embed green/red. Implement that endpoint so sales register as ✅ delivered. Subscriptions are handled separately by the **push** receiver `POST /api/entitlements/subscription` (above). Full contract for both: `ENTITLEMENTS_VERIFY_CONTRACT.md` in the infra (Reverse-Proxy) repo.
 
 ### Statement Descriptors
-Charges from `payment-service` carry a per-app suffix on the customer's card statement, rendered as `ARMADA* <SUFFIX>` (Stripe caps the combined string at 22 chars). The suffix is resolved by `payment-service` from env var `STRIPE_DESCRIPTOR_<APPID>` (uppercase, hyphens stripped) — **no app code change required**. Apps without a configured value inherit the account default. Subscriptions inherit the account default only; per-subscription descriptors are set on the Stripe Price/Product in the Dashboard, not in code.
+Charges from `payment-service` carry a per-app suffix on the customer's card statement, rendered as `ARMADA* <SUFFIX>` (Stripe caps the combined string at 22 chars). The suffix is resolved by `payment-service` from env var `STRIPE_DESCRIPTOR_<APPID>` (uppercase, hyphens stripped) — **no app code change required**. Apps without a configured value inherit the account default.
 
 ## Image Generation (AI)
 The infrastructure includes a centralized image generation service via `llm-core` (`llm.jeab.dev`). Requests are routed through the shared openclaw OpenAI OAuth account — **there is no per-app billing cost**. Use this instead of embedding OpenAI API keys in individual apps.
