@@ -277,14 +277,21 @@ func StartForwardProxy(pool *VPNPool) {
 	}
 
 	server := &http.Server{
-		Addr:    addr,
-		Handler: &forwardProxy{pool: pool, key: apiKey},
+		Addr:              addr,
+		Handler:           &forwardProxy{pool: pool, key: apiKey},
+		ReadHeaderTimeout: 10 * time.Second,
+		IdleTimeout:       60 * time.Second,
+		MaxHeaderBytes:    32 << 10,
 		// Hijacking a CONNECT needs HTTP/1.1, and a tunnel is open for as long
 		// as the caller keeps it, so no read/write timeouts here.
 		TLSNextProto: map[string]func(*http.Server, *tls.Conn, http.Handler){},
 	}
 
 	certFile, keyFile := os.Getenv("FORWARD_PROXY_CERT"), os.Getenv("FORWARD_PROXY_KEY")
+	if os.Getenv("APP_ENV") == "production" && (certFile == "" || keyFile == "") {
+		log.Printf("ERROR forward-proxy: refusing plaintext credential transport in production")
+		return
+	}
 	go func() {
 		if certFile != "" && keyFile != "" {
 			cache := &certCache{certFile: certFile, keyFile: keyFile}

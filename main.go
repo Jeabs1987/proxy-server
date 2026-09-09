@@ -21,12 +21,17 @@ var privateNetworks []*net.IPNet
 
 func init() {
 	for _, cidr := range []string{
+		"0.0.0.0/8",
+		"100.64.0.0/10",
+		"224.0.0.0/4",
 		"127.0.0.0/8",
 		"10.0.0.0/8",
 		"172.16.0.0/12",
 		"192.168.0.0/16",
 		"169.254.0.0/16",
 		"::1/128",
+		"::/128",
+		"ff00::/8",
 		"fc00::/7",
 		"fe80::/10",
 	} {
@@ -657,5 +662,11 @@ func main() {
 
 	log.Printf("Starting VPN Farm Proxy Server on port %s", port)
 	log.Printf("Available VPN endpoints: %d", len(server.vpnPool.endpoints))
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	apiServer := &http.Server{
+		Addr:              ":" + port,
+		ReadHeaderTimeout: 10 * time.Second,
+		IdleTimeout:       60 * time.Second,
+		MaxHeaderBytes:    32 << 10,
+	}
+	log.Fatal(apiServer.ListenAndServe())
 }
