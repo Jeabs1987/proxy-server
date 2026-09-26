@@ -22,7 +22,7 @@ import urllib.error
 import urllib.request
 
 STATUS_URL = "http://127.0.0.1:9001/status"
-CHANNEL_ID = "1529448578437746718"        # Armada support-gateway channel
+CHANNEL_ID = "1553474085378326660"        # Armada #jeabslist (fleet debug)
 SECRETS = "/etc/reverse-proxy/secrets.env"
 STATE = "/var/lib/vpn-health-monitor/state.json"
 UNIT = "go-proxy-server"
