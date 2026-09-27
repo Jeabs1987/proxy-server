@@ -113,6 +113,16 @@ Two traps when diagnosing this:
 - **ICMP is not a liveness test.** `US Chicago` fails to answer ping on all 8 of
   its listed IPs yet its tunnel works. Only an actual gluetun container plus a
   `curl -x` through it proves a region is usable.
+- **A one-day-old image can still be stale for one region.** On 2026-09-27,
+  `US Las Vegas` (8889) and `DE Berlin` (8929) failed `TLS handshake failed` on
+  every listed server (8 each, ~640 failures in 6 h) on an image pulled the night
+  before. PIA's live list (`https://serverlist.piaservers.net/vpninfo/servers/v6`)
+  had moved both regions to IPs that gluetun did not list. Compare that list with
+  the `link remote:` IPs in `docker logs` before you blame the region. gluetun's
+  own updater cannot fix this, because it fetches through the tunnel. Both were
+  swapped for **US Silicon Valley** and **DE Frankfurt** (same ports, static IPs;
+  `main.go` names 1:1). Silicon Valley was one of the regions retired on
+  2026-07-31; it connected again on 2026-09-27.
 
 **Resource note:** idle tunnels use ~85 MiB each (cap 256 MiB); 50 ≈ ~4 GiB on
 the 47 GiB host. CPU caps are `cpus: 0.50` per container (raised from `0.10` to

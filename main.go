@@ -224,7 +224,7 @@ func NewVPNPool() *VPNPool {
 		{Name: "US Seattle", ProxyURL: "http://127.0.0.1:8886", Active: true},
 		{Name: "US Denver", ProxyURL: "http://127.0.0.1:8887", Active: true},
 		{Name: "Ireland", ProxyURL: "http://127.0.0.1:8888", Active: true},
-		{Name: "US Las Vegas", ProxyURL: "http://127.0.0.1:8889", Active: true},
+		{Name: "US Silicon Valley", ProxyURL: "http://127.0.0.1:8889", Active: true},
 		{Name: "US Washington DC", ProxyURL: "http://127.0.0.1:8890", Active: true},
 		{Name: "CA Montreal", ProxyURL: "http://127.0.0.1:8891", Active: true},
 		{Name: "US East", ProxyURL: "http://127.0.0.1:8892", Active: true},
@@ -264,7 +264,7 @@ func NewVPNPool() *VPNPool {
 		{Name: "France", ProxyURL: "http://127.0.0.1:8926", Active: true},
 		{Name: "UK London", ProxyURL: "http://127.0.0.1:8927", Active: true},
 		{Name: "CA Toronto", ProxyURL: "http://127.0.0.1:8928", Active: true},
-		{Name: "DE Berlin", ProxyURL: "http://127.0.0.1:8929", Active: true},
+		{Name: "DE Frankfurt", ProxyURL: "http://127.0.0.1:8929", Active: true},
 		{Name: "Poland", ProxyURL: "http://127.0.0.1:8930", Active: true},
 	}
 

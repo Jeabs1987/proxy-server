@@ -233,17 +233,17 @@ services:
       start_period: 40s
       retries: 3
 
-  # PIA VPN - US Las Vegas
-  vpn-lasvegas:
+  # PIA VPN - US Silicon Valley (was US Las Vegas; PIA moved its servers, see CLAUDE.md)
+  vpn-siliconvalley:
     image: qmcgaw/gluetun
-    container_name: vpn-lasvegas
+    container_name: vpn-siliconvalley
     cap_add:
       - NET_ADMIN
     environment:
       - VPN_SERVICE_PROVIDER=private internet access
       - OPENVPN_USER=${PIA_USERNAME}
       - OPENVPN_PASSWORD=${PIA_PASSWORD}
-      - SERVER_REGIONS=US Las Vegas
+      - SERVER_REGIONS=US Silicon Valley
       - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
       - HTTPPROXY=on
     networks:
@@ -1393,17 +1393,17 @@ services:
       start_period: 40s
       retries: 3
 
-  # PIA VPN - DE Berlin
-  vpn-berlin:
+  # PIA VPN - DE Frankfurt (was DE Berlin; PIA moved its servers, see CLAUDE.md)
+  vpn-frankfurt:
     image: qmcgaw/gluetun
-    container_name: vpn-berlin
+    container_name: vpn-frankfurt
     cap_add:
       - NET_ADMIN
     environment:
       - VPN_SERVICE_PROVIDER=private internet access
       - OPENVPN_USER=${PIA_USERNAME}
       - OPENVPN_PASSWORD=${PIA_PASSWORD}
-      - SERVER_REGIONS=DE Berlin
+      - SERVER_REGIONS=DE Frankfurt
       - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
       - HTTPPROXY=on
     networks:
