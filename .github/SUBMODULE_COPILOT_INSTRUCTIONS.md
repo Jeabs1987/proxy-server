@@ -11,6 +11,38 @@ Follow these instructions to ensure your application deploys and runs correctly 
 - **Process Manager:** Systemd manages the Go binary.
 - **Deployment:** Automated via `deploy.sh` on the host, which pulls changes, builds, and restarts services.
 
+## Secondary Main VPS / sharded components
+
+- Primary: `ssh root@213.199.48.131` (or `ssh vps-primary` on the owner's workstation).
+- Secondary: `ssh root@169.58.2.110` (or `ssh vps-secondary`), port **22**, same operator
+  `~/.ssh/id_ed25519` identity. Never put SSH keys or server passwords in this repo.
+- **Status 2026-09-28: Secondary is secured and privately connected; no production apps migrated.**
+  Private addresses are `primary.internal` / `10.20.0.1` and
+  `secondary.internal` / `10.20.0.2`, over a separate `wg-apps` tunnel. These are
+  not public DNS records; they resolve locally on both VPSes.
+- Set remote dependencies through env variables (`WORKER_BASE_URL`,
+  `PRIMARY_API_BASE_URL`); `localhost` URLs elsewhere in this document mean the
+  service is on **Primary**. Shared services do not automatically exist on Secondary.
+- Bind workers to their private address and `PORT`; request per-port firewall rules,
+  use per-service authentication, deadlines and version-reporting health endpoints.
+  Keep secrets in root-owned per-service EnvironmentFiles, outside Git/releases.
+- Reuse HTTP connections, batch CPU work and cap worker concurrency. Keep a single
+  owner for each queue/job; add idempotency and backpressure before moving work.
+  The tunnel has a pair-specific pre-shared key; app credentials remain separate.
+- Sharding is opt-in through infra `configs/fleet/projects.json`: one full Git SHA,
+  ordered host roles, and a committed `.infra/fleet.sh` implementing `prepare`,
+  `activate`, `health`, `rollback`. `scripts/fleet-deploy.py` stages that same commit
+  everywhere before activation and attempts rollback on failure. It is currently
+  operator-triggered; an enrolled app's normal push does not deploy it by itself.
+- Never run the Primary all-services `deploy.sh` on Secondary. Before enrolling an
+  existing app, drain/disable its old unit and pause it in infra. Provision dedicated
+  `fleet-<project>-<role>` systemd units; never duplicate scheduled jobs, mutable
+  databases, payment execution or game-account sessions. Rolling upgrades require
+  adjacent-version compatibility; this is not an atomic two-server transaction.
+- Full runbook, readiness, measured latency, hook/recovery/backup contract:
+  [Reverse-Proxy secondary integration](https://github.com/ArmadaInteractiveCo/Reverse-Proxy/blob/main/.github/SECONDARY_VPS.md)
+  (local infra checkout: `.github/SECONDARY_VPS.md`).
+
 ## Build & Run Requirements
 
 ### 1. Go Backend
