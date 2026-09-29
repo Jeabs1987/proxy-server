@@ -91,7 +91,7 @@ curl http://localhost:8080/status
 ### API Endpoints
 
 #### `GET /`
-Web interface showing available VPNs and usage examples.
+A one-line plain-text answer for uptime checks. Every other unknown path returns 404.
 
 #### `GET /proxy`
 Proxy HTTP requests through VPN connections.
@@ -102,15 +102,14 @@ Proxy HTTP requests through VPN connections.
   - `roundrobin` (default): Distribute requests evenly across VPNs
   - `random`: Select a random VPN for each request
   - `specific`: Use a specific VPN (requires `vpn` parameter)
-- `vpn` (optional): VPN name when using `strategy=specific`
-  - Available: `US Florida`, `US California`, `US New York`, `US Texas`, `US Chicago`
+- `vpn` (optional): VPN name when using `strategy=specific`. The names are in `/status` and [endpoints.json](endpoints.json).
 
 **Response Headers:**
 - `X-VPN-Used`: Name of the VPN that handled the request
-- `X-VPN-Proxy`: Internal proxy URL used
 
 #### `GET /status`
-Returns JSON with status of all VPN endpoints.
+Returns JSON with the health, exit IP, and request counters of every tunnel.
+The full API is in [.github/PROXY_API_SPEC.md](.github/PROXY_API_SPEC.md).
 
 ### Examples
 
@@ -142,33 +141,33 @@ curl -I "http://localhost:8080/proxy?url=https://httpbin.org/ip" | grep X-VPN
 
 ### Adding More VPN Locations
 
-Edit [docker-compose.yml](docker-compose.yml) to add more VPN containers:
+Each tunnel is defined in two files that must match 1:1:
+
+1. Add a service to [docker-compose.yml](docker-compose.yml). Use the next free host port and static IP:
 
 ```yaml
-vpn-australia:
-  image: qmcgaw/gluetun
-  container_name: vpn-australia
-  cap_add:
-    - NET_ADMIN
-  environment:
-    - VPN_SERVICE_PROVIDER=private internet access
-    - OPENVPN_USER=${PIA_USERNAME}
-    - OPENVPN_PASSWORD=${PIA_PASSWORD}
-    - SERVER_REGIONS=AU Sydney
-    - FIREWALL_OUTBOUND_SUBNETS=172.22.0.0/16
-  networks:
-    vpn_network:
-      ipv4_address: 172.22.0.15
-  ports:
-    - "8886:8888"
-  restart: unless-stopped
+  vpn-austria:
+    <<: *gluetun
+    container_name: vpn-austria
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Austria
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.110
+    ports:
+      - "127.0.0.1:8981:8888"
 ```
 
-Then update [main.go](main.go) to add the endpoint:
+2. Add the endpoint to [endpoints.json](endpoints.json). The name must equal `SERVER_REGIONS`:
 
-```go
-{Name: "Australia", ProxyURL: "http://172.22.0.15:8888", Active: true},
+```json
+  {"name": "Austria", "proxy_url": "http://127.0.0.1:8981"}
 ```
+
+3. Run `go test ./...`. `TestEndpointsMatchCompose` fails if the two files differ.
+
+`ENDPOINTS_FILE` replaces the built-in list at run time. `${VAR}` references in `proxy_url` expand from the environment, for example `http://${FARM2_AUTH}@10.66.0.2:8881` for a tunnel on another host.
 
 ### Available PIA Regions
 

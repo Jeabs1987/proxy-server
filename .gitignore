@@ -30,3 +30,10 @@ go.work
 # OS
 .DS_Store
 Thumbs.db
+
+# go build output when the -o flag is omitted (module name)
+vpn-farm
+
+# Local backups and caches on the VPS checkout
+docker-compose.yml.bak*
+scripts/__pycache__/

@@ -14,6 +14,7 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"crypto/subtle"
 	"crypto/tls"
 	"encoding/base64"
@@ -26,6 +27,7 @@ import (
 	"os"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -48,50 +50,44 @@ type forwardProxy struct {
 }
 
 func (f *forwardProxy) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	endpoint, ok := f.authorize(w, r)
+	endpoint, strategy, ok := f.authorize(w, r)
 	if !ok {
 		return
 	}
 
 	if r.Method == http.MethodConnect {
-		f.handleConnect(w, r, endpoint)
+		f.handleConnect(w, r, endpoint, strategy)
 		return
 	}
-	f.handleAbsolute(w, r, endpoint)
+	f.handleAbsolute(w, r, endpoint, strategy)
 }
 
 // authorize checks the proxy credentials and resolves the username into the
-// tunnel the caller asked for. It writes the error response itself.
-func (f *forwardProxy) authorize(w http.ResponseWriter, r *http.Request) (*VPNEndpoint, bool) {
+// tunnel the caller asked for and the strategy that picked it. It writes the
+// error response itself.
+func (f *forwardProxy) authorize(w http.ResponseWriter, r *http.Request) (*VPNEndpoint, string, bool) {
 	selector, key, ok := parseProxyAuth(r.Header.Get("Proxy-Authorization"))
 	if !ok || subtle.ConstantTimeCompare([]byte(key), []byte(f.key)) != 1 {
 		w.Header().Set("Proxy-Authenticate", `Basic realm="vpn-farm"`)
 		http.Error(w, "Proxy authentication required", http.StatusProxyAuthRequired)
-		return nil, false
+		return nil, "", false
 	}
 
-	switch strings.ToLower(selector) {
-	case "", "roundrobin":
-		endpoint, ok := f.pool.GetNextEndpoint()
+	switch strategy := strings.ToLower(selector); strategy {
+	case "", strategyRoundRobin, strategyRandom:
+		endpoint, ok := f.pool.pick(strategy, nil)
 		if !ok {
 			http.Error(w, "No VPN endpoints available", http.StatusServiceUnavailable)
-			return nil, false
+			return nil, "", false
 		}
-		return endpoint, true
-	case "random":
-		endpoint, ok := f.pool.GetRandomEndpoint()
-		if !ok {
-			http.Error(w, "No VPN endpoints available", http.StatusServiceUnavailable)
-			return nil, false
-		}
-		return endpoint, true
+		return endpoint, strategy, true
 	default:
 		endpoint := f.pool.GetEndpointByName(selector)
 		if endpoint == nil {
 			http.Error(w, "VPN endpoint not found: "+selector, http.StatusBadGateway)
-			return nil, false
+			return nil, "", false
 		}
-		return endpoint, true
+		return endpoint, strategySpecific, true
 	}
 }
 
@@ -111,7 +107,7 @@ func parseProxyAuth(header string) (user, pass string, ok bool) {
 
 // handleConnect tunnels raw bytes to the target through the tunnel's HTTP
 // proxy, which is what every https:// request through a proxy uses.
-func (f *forwardProxy) handleConnect(w http.ResponseWriter, r *http.Request, endpoint *VPNEndpoint) {
+func (f *forwardProxy) handleConnect(w http.ResponseWriter, r *http.Request, endpoint *VPNEndpoint, strategy string) {
 	target := r.Host
 	if _, _, err := net.SplitHostPort(target); err != nil {
 		target = net.JoinHostPort(target, "443")
@@ -122,38 +118,39 @@ func (f *forwardProxy) handleConnect(w http.ResponseWriter, r *http.Request, end
 		return
 	}
 
-	proxyURL, err := url.Parse(endpoint.ProxyURL)
-	if err != nil {
-		http.Error(w, "Bad endpoint configuration", http.StatusInternalServerError)
-		return
-	}
+	// A failed CONNECT sends nothing to the target, so another tunnel can take
+	// over unless the caller named this one.
+	tried := make(map[*VPNEndpoint]bool)
+	var upstream net.Conn
+	var upstreamReader *bufio.Reader
+	for attempt := 1; ; attempt++ {
+		tried[endpoint] = true
+		retryable := strategy != strategySpecific && attempt < maxAttempts && r.Context().Err() == nil
+		budget := lastAttemptBudget
+		if retryable {
+			budget = connectBudget
+		}
+		var err error
+		upstream, upstreamReader, err = openTunnel(endpoint, target, r, budget)
+		if err == nil {
+			endpoint.stats.record(http.StatusOK)
+			break
+		}
+		endpoint.stats.recordError()
+		endpoint.recheck()
+		log.Printf("WARN forward-proxy: %s: %v", endpoint.Name, err)
 
-	upstream, err := net.DialTimeout("tcp", proxyURL.Host, 10*time.Second)
-	if err != nil {
-		log.Printf("WARN forward-proxy: dial %s (%s): %v", endpoint.Name, proxyURL.Host, err)
-		http.Error(w, "Failed to reach VPN endpoint: "+err.Error(), http.StatusBadGateway)
-		return
+		var next *VPNEndpoint
+		if retryable {
+			next, _ = f.pool.pick(strategy, tried)
+		}
+		if next == nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
+			return
+		}
+		endpoint = next
 	}
 	defer upstream.Close()
-
-	if _, err := fmt.Fprintf(upstream, "CONNECT %s HTTP/1.1\r\nHost: %s\r\n\r\n", target, target); err != nil {
-		http.Error(w, "Failed to open tunnel: "+err.Error(), http.StatusBadGateway)
-		return
-	}
-
-	upstreamReader := bufio.NewReader(upstream)
-	resp, err := http.ReadResponse(upstreamReader, r)
-	if err != nil {
-		http.Error(w, "Failed to open tunnel: "+err.Error(), http.StatusBadGateway)
-		return
-	}
-	// resp.Body is deliberately left alone. The connection is the tunnel, not a
-	// message body: closing it makes net/http drain the socket to EOF, which
-	// tears down the tunnel before the caller sends its first byte.
-	if resp.StatusCode != http.StatusOK {
-		http.Error(w, "VPN endpoint refused CONNECT: "+resp.Status, http.StatusBadGateway)
-		return
-	}
 
 	hijacker, ok := w.(http.Hijacker)
 	if !ok {
@@ -174,15 +171,95 @@ func (f *forwardProxy) handleConnect(w http.ResponseWriter, r *http.Request, end
 
 	// Both buffered readers may already hold bytes read off the socket, so copy
 	// from them rather than from the raw connections.
+	var lastActive atomic.Int64
+	lastActive.Store(time.Now().UnixNano())
 	done := make(chan struct{}, 2)
-	go func() { io.Copy(upstream, clientBuf); done <- struct{}{} }()
-	go func() { io.Copy(client, upstreamReader); done <- struct{}{} }()
-	<-done // the deferred closes unblock the other direction
+	go func() { io.Copy(upstream, activityReader{clientBuf, &lastActive}); done <- struct{}{} }()
+	go func() { io.Copy(client, activityReader{upstreamReader, &lastActive}); done <- struct{}{} }()
+
+	idle := time.NewTicker(tunnelIdleTimeout / 5)
+	defer idle.Stop()
+	for {
+		select {
+		case <-done:
+			return // the deferred closes unblock the other direction
+		case <-idle.C:
+			if time.Since(time.Unix(0, lastActive.Load())) > tunnelIdleTimeout {
+				return
+			}
+		}
+	}
+}
+
+// lastAttemptBudget bounds a CONNECT that no other tunnel can take over. It
+// matches the endpoint client timeout.
+const lastAttemptBudget = 30 * time.Second
+
+// openTunnel asks the endpoint's HTTP proxy for a CONNECT tunnel to target.
+// The whole exchange must finish within budget, so a hung VPN tunnel fails
+// and another can take over. Bytes the proxy sent after its response stay in
+// the reader.
+func openTunnel(endpoint *VPNEndpoint, target string, r *http.Request, budget time.Duration) (net.Conn, *bufio.Reader, error) {
+	proxyURL, err := url.Parse(endpoint.ProxyURL)
+	if err != nil {
+		return nil, nil, fmt.Errorf("bad endpoint configuration: %v", err)
+	}
+
+	upstream, err := net.DialTimeout("tcp", proxyURL.Host, budget)
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to reach VPN endpoint %s: %v", proxyURL.Host, err)
+	}
+	upstream.SetDeadline(time.Now().Add(budget))
+
+	auth := ""
+	if proxyURL.User != nil {
+		password, _ := proxyURL.User.Password()
+		credentials := base64.StdEncoding.EncodeToString([]byte(proxyURL.User.Username() + ":" + password))
+		auth = "Proxy-Authorization: Basic " + credentials + "\r\n"
+	}
+	if _, err := fmt.Fprintf(upstream, "CONNECT %s HTTP/1.1\r\nHost: %s\r\n%s\r\n", target, target, auth); err != nil {
+		upstream.Close()
+		return nil, nil, fmt.Errorf("failed to open tunnel: %v", err)
+	}
+
+	reader := bufio.NewReader(upstream)
+	resp, err := http.ReadResponse(reader, r)
+	if err != nil {
+		upstream.Close()
+		return nil, nil, fmt.Errorf("failed to open tunnel: %v", err)
+	}
+	// resp.Body is deliberately left alone. The connection is the tunnel, not a
+	// message body: closing it makes net/http drain the socket to EOF, which
+	// tears down the tunnel before the caller sends its first byte.
+	if resp.StatusCode != http.StatusOK {
+		upstream.Close()
+		return nil, nil, fmt.Errorf("VPN endpoint refused CONNECT: %s", resp.Status)
+	}
+	upstream.SetDeadline(time.Time{})
+	return upstream, reader, nil
+}
+
+// tunnelIdleTimeout closes a CONNECT tunnel after this long with no bytes in
+// either direction, so an abandoned tunnel does not hold its sockets forever.
+const tunnelIdleTimeout = 5 * time.Minute
+
+// activityReader records the time of every read that returns data.
+type activityReader struct {
+	r    io.Reader
+	last *atomic.Int64
+}
+
+func (a activityReader) Read(p []byte) (int, error) {
+	n, err := a.r.Read(p)
+	if n > 0 {
+		a.last.Store(time.Now().UnixNano())
+	}
+	return n, err
 }
 
 // handleAbsolute serves a plain http:// request, which proxy clients send with
 // the full URL in the request line instead of a CONNECT.
-func (f *forwardProxy) handleAbsolute(w http.ResponseWriter, r *http.Request, endpoint *VPNEndpoint) {
+func (f *forwardProxy) handleAbsolute(w http.ResponseWriter, r *http.Request, endpoint *VPNEndpoint, strategy string) {
 	if !r.URL.IsAbs() {
 		http.Error(w, "This port is a forward proxy; send an absolute URL or CONNECT", http.StatusBadRequest)
 		return
@@ -193,27 +270,35 @@ func (f *forwardProxy) handleAbsolute(w http.ResponseWriter, r *http.Request, en
 		return
 	}
 
-	proxyReq, err := http.NewRequest(r.Method, r.URL.String(), r.Body)
-	if err != nil {
-		http.Error(w, "Failed to create request: "+err.Error(), http.StatusInternalServerError)
+	body, ok := readBody(w, r)
+	if !ok {
 		return
 	}
 
-	for key, values := range r.Header {
-		lower := strings.ToLower(key)
-		if hopByHopHeaders[lower] || sensitiveHeaders[lower] {
-			continue
+	target := r.URL.String()
+	resp, used, release, err := f.pool.forward(endpoint, strategy, func() (*http.Request, error) {
+		proxyReq, err := http.NewRequestWithContext(r.Context(), r.Method, target, bytes.NewReader(body))
+		if err != nil {
+			return nil, err
 		}
-		for _, value := range values {
-			proxyReq.Header.Add(key, value)
+		for key, values := range r.Header {
+			lower := strings.ToLower(key)
+			if hopByHopHeaders[lower] || sensitiveHeaders[lower] {
+				continue
+			}
+			for _, value := range values {
+				proxyReq.Header.Add(key, value)
+			}
 		}
-	}
-
-	resp, err := endpoint.client.Do(proxyReq)
+		return proxyReq, nil
+	})
 	if err != nil {
-		http.Error(w, "Failed to execute request: "+err.Error(), http.StatusBadGateway)
+		if r.Context().Err() == nil {
+			http.Error(w, "Failed to execute request: "+err.Error(), http.StatusBadGateway)
+		}
 		return
 	}
+	defer release()
 	defer resp.Body.Close()
 
 	for key, values := range resp.Header {
@@ -224,7 +309,7 @@ func (f *forwardProxy) handleAbsolute(w http.ResponseWriter, r *http.Request, en
 			w.Header().Add(key, value)
 		}
 	}
-	w.Header().Set("X-VPN-Used", endpoint.Name)
+	w.Header().Set("X-VPN-Used", used.Name)
 	w.WriteHeader(resp.StatusCode)
 	io.Copy(w, resp.Body)
 }

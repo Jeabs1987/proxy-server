@@ -16,34 +16,42 @@ containers so consumers get rotating egress IPs.
 - **Binary:** build output named `main` in app root. Never commit `main`, `.env`.
 - **Creds:** PIA login lives in `.env` on the VPS (`PIA_USERNAME`/`PIA_PASSWORD`),
   gitignored. `setup-vpn.sh` writes it. The 50 containers read it via `${…}`.
-- **Deploy:** push to `main` → VPS auto-pulls + rebuilds + restarts.
+- **Deploy:** push to `main` → VPS auto-pulls + rebuilds + restarts the Go
+  service. Deploy does **not** run `docker compose up` for this app, so compose
+  changes reach running containers only through the Sunday staggered restart or
+  a manual `docker compose up -d --no-deps <services>` over SSH.
   Run runtime/docker commands over SSH on the Main VPS (`root@213.199.48.131`);
   never hand-edit files under `/opt/reverse-proxy/apps/` on the VPS.
 
-## The 50-Endpoint Invariant (read before touching the farm)
+## The Endpoint Invariant (read before touching the farm)
 
 The endpoint set is defined in **two places that MUST stay 1:1**:
 
-1. `main.go` → `NewVPNPool()` hardcodes **50** `VPNEndpoint`s, each pointing at
-   `http://127.0.0.1:88xx` (host ports **8881–8930**).
+1. `endpoints.json` lists **50** endpoints (`name`, `proxy_url`), each pointing at
+   `http://127.0.0.1:88xx` (host ports **8881–8930**). `go:embed` builds it into
+   the binary. `ENDPOINTS_FILE` overrides it at run time, and `${VAR}` in a
+   `proxy_url` expands from the environment (for credentials of a remote farm).
 2. `docker-compose.yml` defines **50** `vpn-*` services, each publishing
-   `88xx:8888` on a unique static IP `172.22.0.x`.
+   `127.0.0.1:88xx:8888` on a unique static IP `172.22.0.x`. The shared settings
+   sit in the `x-gluetun` / `x-pia-env` anchors.
 
-`main.go` round-robins over the endpoints, but **`StartHealthChecks` probes each
-tunnel every 60s** (`GET https://api.ipify.org` through the endpoint) and flips
-`Active` — so `GetNextEndpoint`/`GetRandomEndpoint` automatically skip tunnels
-that can't currently reach the internet (e.g. dead PIA regions, see below).
-`/status` reflects the live result. Without this a dead slot returns `502`
-(`proxyconnect …`) straight to the caller (e.g. ks-redeemer "all 5 attempts
-blocked by game server"). Endpoints start optimistically `Active` and converge
-~10s after boot, so the first few seconds post-restart may still 502.
+An endpoint `name` must equal its service's `SERVER_REGIONS`, and its port must
+equal the published port.
 
-**Verify correspondence after any change:**
-```bash
-grep -c '{Name: "' main.go            # → 50  (endpoints)
-grep -cE '^  vpn-' docker-compose.yml # → 50  (services)
-```
-If you add/remove an endpoint, change BOTH files (port + static IP must be unique).
+**Verify correspondence after any change:** `go test ./...`.
+`TestEndpointsMatchCompose` fails on any name, port, or static-IP mismatch.
+
+**Health and failover.** `StartHealthChecks` probes each tunnel every 60 s
+(`https://api.ipify.org`, then `https://1.1.1.1/cdn-cgi/trace` if ipify fails,
+so one provider outage cannot empty the pool) and flips `Active`. Routing skips
+inactive tunnels. `/status` shows each tunnel's `exit_ip` and request counters,
+and the `[health]` log line counts distinct exit IPs. When a request fails
+**before the target has seen it** (dial, CONNECT, or TLS failure, or no
+connection within 6 s), the proxy retries it on up to 2 other tunnels and
+re-probes the failed one at once. It never retries after the target may have
+received the request, and `strategy=specific` never switches tunnels. Endpoints
+start optimistically `Active` and converge in 15–35 s after boot. Until then,
+failover covers dead slots.
 
 ## Drift: why the farm shrank, and how it's prevented
 
@@ -53,8 +61,8 @@ If you add/remove an endpoint, change BOTH files (port + static IP must be uniqu
 old weekly cron (below), the running set became a one-way ratchet that only
 shrank — leaving `main.go` round-robining over 30 dead ports (mostly `502`).
 The profiles were removed so **all 50 start by default**. If you ever need to
-reduce capacity, drop the endpoints from `main.go` too (keep them 1:1) rather
-than disabling containers behind the running proxy.
+reduce capacity, drop the endpoints from `endpoints.json` too (keep them 1:1)
+rather than disabling containers behind the running proxy.
 
 **Bring up / reconcile the full farm (over SSH):**
 ```bash
@@ -92,8 +100,8 @@ Dakotas, Vermont — PIA genuinely removed them) were swapped for working NA/EU
 regions (New York, Vancouver, Mexico, Netherlands, France, UK London, Berlin),
 giving ~50/50. When picking replacements, test a candidate first
 (`docker run --rm --cap-add=NET_ADMIN -e VPN_SERVICE_PROVIDER='private internet access' -e OPENVPN_USER=… -e OPENVPN_PASSWORD=… -e SERVER_REGIONS='<region>' -e HTTPPROXY=on -p 9999:8888 qmcgaw/gluetun`
-then `curl -x http://127.0.0.1:9999 https://api.ipify.org`) and keep `main.go`'s
-endpoint `Name` 1:1 with the compose `SERVER_REGIONS`.
+then `curl -x http://127.0.0.1:9999 https://api.ipify.org`) and keep the
+`endpoints.json` name 1:1 with the compose `SERVER_REGIONS`.
 
 **A fresh image does NOT always help — PIA keeps retiring US micro-regions.**
 On 2026-07-31 seven more regions died (Texas, Atlanta, Silicon Valley, Oregon,
@@ -124,6 +132,6 @@ Two traps when diagnosing this:
   `main.go` names 1:1). Silicon Valley was one of the regions retired on
   2026-07-31; it connected again on 2026-09-27.
 
-**Resource note:** idle tunnels use ~85 MiB each (cap 256 MiB); 50 ≈ ~4 GiB on
-the 47 GiB host. CPU caps are `cpus: 0.50` per container (raised from `0.10` to
+**Resource note:** tunnels use about 30 MiB each (cap 256 MiB). On 2026-09-29
+the 50 used 1.5 GiB in total on the 47 GiB host, and a median of 1.7% CPU each. CPU caps are `cpus: 0.50` per container (raised from `0.10` to
 stop CFS throttling — see infra `VPS_PERFORMANCE_INVESTIGATION.md`).

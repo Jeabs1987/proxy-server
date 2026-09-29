@@ -1,0 +1,146 @@
+[
+  {
+    "severity": "important",
+    "category": "reliability",
+    "title": "Health check depends on one third-party host",
+    "file": "main.go",
+    "line": 171,
+    "description": "Every probe fetches https://api.ipify.org. If ipify is down or rate-limits the VPS, all 50 probes fail, every endpoint goes INACTIVE, and /proxy returns 503 for all traffic although the tunnels work.",
+    "recommendation": "Probe two independent targets (for example api.ipify.org and https://1.1.1.1/cdn-cgi/trace) and mark an endpoint dead only when both fail. In runHealthCheck, if every endpoint fails in one pass, keep the previous Active states and log an ERROR instead of emptying the pool."
+  },
+  {
+    "severity": "important",
+    "category": "reliability",
+    "title": "No failover when a tunnel fails mid-cycle",
+    "file": "main.go",
+    "line": 509,
+    "description": "A client.Do error returns 502 at once. A tunnel that dies between health passes (CA Vancouver flaps many times a day) takes 1/48 of traffic until the next pass, up to about 75 s later. Nginx shows about 1.2% of /proxy requests as 502.",
+    "recommendation": "Buffer the request body (cap about 1 MiB). If client.Do fails with a proxy connect or dial error (the target never got the request), mark the endpoint inactive at once and retry up to 2 times on other active endpoints. Do not retry after the target sent a response. Apply the same to forwardproxy.go handleAbsolute and handleConnect dial failures."
+  },
+  {
+    "severity": "important",
+    "category": "performance",
+    "title": "Upstream request ignores caller cancellation",
+    "file": "main.go",
+    "line": 492,
+    "description": "http.NewRequest drops r.Context(). When the caller gives up (nginx logs about 3.7% 499s), the upstream request keeps running for up to 30 s and holds a tunnel connection.",
+    "recommendation": "Use http.NewRequestWithContext(r.Context(), ...) here and in forwardproxy.go:196."
+  },
+  {
+    "severity": "important",
+    "category": "performance",
+    "title": "Endpoint transport has no connect-phase timeouts",
+    "file": "main.go",
+    "line": 150,
+    "description": "The Transport sets no dial, TLSHandshakeTimeout, or ResponseHeaderTimeout. A struct-literal Transport has no TLS handshake limit, so a hung tunnel fails only at the 30 s client timeout. ks-redeemer times out at 15 s, so it gives up first (499) and cannot retry quickly.",
+    "recommendation": "Set DialContext with a 5 s net.Dialer timeout, TLSHandshakeTimeout 5 s, and ResponseHeaderTimeout 10 s. Keep the client Timeout below the slowest caller timeout (for example 12 s)."
+  },
+  {
+    "severity": "important",
+    "category": "architecture",
+    "title": "Endpoint set is hardcoded in two files",
+    "file": "main.go",
+    "line": 217,
+    "description": "NewVPNPool hardcodes 50 endpoints that must stay 1:1 with 50 compose services. Drift has already caused an outage (see CLAUDE.md). A second 50-tunnel farm on another host doubles this surface.",
+    "recommendation": "Load endpoints from a file (for example endpoints.json with name and proxy_url, path from ENDPOINTS_FILE). Generate docker-compose.yml from the same list, or use an x-gluetun YAML anchor so each service is a few lines. Keep the grep checks in CLAUDE.md as a CI test."
+  },
+  {
+    "severity": "important",
+    "category": "observability",
+    "title": "No per-endpoint request stats or exit IP",
+    "file": "main.go",
+    "line": 533,
+    "description": "The proxy logs no requests and /status shows only name and active. You cannot see which exit IPs draw 429s or Cloudflare blocks, or whether two tunnels share an IP.",
+    "recommendation": "Keep atomic counters per endpoint (requests, 2xx, 429, 5xx, transport errors, last latency). Store the exit IP from the ipify probe body. Return both in /status. The vpn-health-monitor can then alert on duplicate or burned IPs."
+  },
+  {
+    "severity": "important",
+    "category": "performance",
+    "title": "Co-located consumer calls the farm through Cloudflare",
+    "file": "../ks-redeemer/redeemer/api.go",
+    "line": 105,
+    "description": "The redeemers run on the same VPS but call https://proxy.jeab.dev/proxy, which resolves to Cloudflare. Each game request leaves the host, crosses Cloudflare, and returns through nginx TLS before it reaches :9001. This adds latency and makes redemption depend on Cloudflare.",
+    "recommendation": "Read the base URL from an env var (PROXY_BASE_URL, default the public URL) and set it to http://127.0.0.1:9001/proxy in the three co-located redeemer units."
+  },
+  {
+    "severity": "important",
+    "category": "operations",
+    "title": "US New Mexico tunnel dead for over 24 hours",
+    "file": "docker-compose.yml",
+    "line": 1194,
+    "description": "vpn-newmexico (8922) reports TLS handshake failed on every attempt and has not changed state in the proxy log for 24 h. This is the same pattern as the Las Vegas and Berlin failures on 2026-09-27.",
+    "recommendation": "Compare the container's link remote IPs with https://serverlist.piaservers.net/vpninfo/servers/v6. If the region moved or retired, swap it per the CLAUDE.md playbook and keep main.go:260 1:1."
+  },
+  {
+    "severity": "nice-to-have",
+    "category": "hygiene",
+    "title": "9 MB build binary is committed",
+    "file": ".gitignore",
+    "line": 5,
+    "description": "vpn-farm (a 9 MB ELF from go build) is tracked, with 4 versions in history. .gitignore covers main only. Commit a5745ae calls it a submodule, but it is a binary.",
+    "recommendation": "git rm --cached vpn-farm and add vpn-farm to .gitignore. Also ignore docker-compose.yml.bak* and scripts/__pycache__/, which are untracked on the VPS checkout."
+  },
+  {
+    "severity": "nice-to-have",
+    "category": "security",
+    "title": "Tunnel ports publish on 0.0.0.0",
+    "file": "docker-compose.yml",
+    "line": 21,
+    "description": "Ports 8881-8930 bind to all interfaces. Only the DOCKER-USER DROP rule for 8881:8930 on eth0 keeps them from being an open proxy. A new port outside that range, or a second host without the rule, would be open.",
+    "recommendation": "Publish as 127.0.0.1:88xx:8888 on the main VPS. On a remote farm, bind to the private link address only and set HTTPPROXY_USER and HTTPPROXY_PASSWORD."
+  },
+  {
+    "severity": "nice-to-have",
+    "category": "performance",
+    "title": "Health-check jitter holds the semaphore",
+    "file": "main.go",
+    "line": 390,
+    "description": "Each goroutine sleeps 0-14 s after it takes a semaphore slot, so 10 slots spend most of their time asleep. A full pass takes about 40-60 s. The comment at main.go:360 says the pool converges in about 10 s.",
+    "recommendation": "Sleep before acquiring the semaphore, and fix the comment."
+  },
+  {
+    "severity": "nice-to-have",
+    "category": "correctness",
+    "title": "Cookie header is stripped from target requests",
+    "file": "main.go",
+    "line": 71,
+    "description": "sensitiveHeaders drops Cookie and Authorization on the way to the target, but ks-redeemer keeps a cookie jar for the game host. Cloudflare cookies such as __cf_bm never return, which can raise the challenge rate. The set-cookie entry (line 74) is dead because the map filters request headers only.",
+    "recommendation": "Confirm whether the game gateway sets cookies. If it does, forward Cookie to the target and strip only the proxy's own credentials (x-api-key, proxy-authorization). Remove set-cookie from the map."
+  },
+  {
+    "severity": "nice-to-have",
+    "category": "security",
+    "title": "API key comparison is not constant-time",
+    "file": "main.go",
+    "line": 106,
+    "description": "requireAPIKey uses key != apiKey. The forward proxy uses subtle.ConstantTimeCompare for the same key.",
+    "recommendation": "Use subtle.ConstantTimeCompare in requireAPIKey."
+  },
+  {
+    "severity": "nice-to-have",
+    "category": "dead-code",
+    "title": "Root page cannot load its data",
+    "file": "main.go",
+    "line": 557,
+    "description": "The page fetches /status without a key, so it always gets 401 and stays on Loading. The usage examples say port 8080. The handler also answers every unknown path.",
+    "recommendation": "Replace the page with a short plain-text 200, or delete it and return 404 for unknown paths."
+  },
+  {
+    "severity": "nice-to-have",
+    "category": "dead-code",
+    "title": "Stale scaffolding",
+    "file": "main.go",
+    "line": 617,
+    "description": "rand.Seed has no effect since Go 1.24. Dockerfile builds with golang:1.21 against go 1.26 and deployment does not use it. PROXY_API_SPEC.md lists 5 VPN names, an X-VPN-Proxy header, and a proxy field that do not exist. CLAUDE.md:127 says 85 MiB per tunnel, but the measured figure is about 30 MiB (1.5 GiB for 50).",
+    "recommendation": "Delete rand.Seed. Delete or update the Dockerfile. Point the spec at /status for names and remove the X-VPN-Proxy header and proxy field. Update the CLAUDE.md resource note."
+  },
+  {
+    "severity": "nice-to-have",
+    "category": "reliability",
+    "title": "CONNECT tunnels have no idle limit",
+    "file": "forwardproxy.go",
+    "line": 169,
+    "description": "A hijacked CONNECT clears all deadlines. A client that leaves a tunnel open holds two goroutines and two sockets until the peer closes.",
+    "recommendation": "Wrap both connections with an idle deadline (for example 5 min, refreshed on each read)."
+  }
+]
