@@ -29,7 +29,7 @@ UNIT = "go-proxy-server"
 
 FAIL_THRESHOLD = 6     # consecutive down-checks before a per-endpoint alert (~30 min @ 5m)
 POOL_THRESHOLD = 2     # consecutive checks before a whole-farm alert (~10 min)
-POOL_FLOOR = 40        # fewer than this many active endpoints = farm-level problem
+POOL_FLOOR_FRACTION = 0.8  # fewer active than this share of all endpoints = farm-level problem
 POOL_KEY = "<farm-down>"
 
 
@@ -78,6 +78,11 @@ def get_status(api_key):
         return code, body
 
 
+def pool_floor(total):
+    """Active endpoints below this count are a farm-level problem (40 of 50, 80 of 100)."""
+    return int(total * POOL_FLOOR_FRACTION)
+
+
 def down_now(code, data):
     """(set of DOWN endpoint names, active_count, total_count)."""
     if code is None or code != 200 or not isinstance(data, dict):
@@ -87,7 +92,7 @@ def down_now(code, data):
         return {POOL_KEY}, 0, 0
     down = {e.get("name", "?") for e in eps if not e.get("active")}
     active = len(eps) - len(down)
-    if active < POOL_FLOOR:
+    if active < pool_floor(len(eps)):
         return {POOL_KEY}, active, len(eps)
     return down, active, len(eps)
 
@@ -148,7 +153,7 @@ def main():
         if newly_bad == [POOL_KEY]:
             msg = (":rotating_light: **VPN farm down** — only %d/%d tunnels active "
                    "(floor %d, status=%s). Check `docker ps --filter name=vpn-` and "
-                   "the go-proxy-server journal." % (active, total, POOL_FLOOR, code))
+                   "the go-proxy-server journal." % (active, total, pool_floor(total), code))
         else:
             msg = (":rotating_light: **VPN endpoints dead** — %s down for >=%d checks "
                    "(%d/%d active). PIA has likely retired the region: test candidates "

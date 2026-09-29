@@ -2,9 +2,9 @@
 # scripts/staggered-restart.sh
 #
 # Weekly maintenance restart for the VPN farm.
-# Recreates all 50 vpn-* containers in batches of 10, with a 20-second pause
-# between batches.  This keeps ~40 tunnels live at all times during maintenance
-# instead of causing a complete outage.
+# Recreates every vpn-* container in batches of 10, with a 20-second pause
+# between batches.  Only 10 tunnels are down at any time during maintenance
+# (the proxy fails requests over to the others) instead of a complete outage.
 #
 # Usage (from the repo root):
 #   bash scripts/staggered-restart.sh

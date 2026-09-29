@@ -15,7 +15,7 @@ containers so consumers get rotating egress IPs.
 - **Port:** always `os.Getenv("PORT")`. Never hardcode.
 - **Binary:** build output named `main` in app root. Never commit `main`, `.env`.
 - **Creds:** PIA login lives in `.env` on the VPS (`PIA_USERNAME`/`PIA_PASSWORD`),
-  gitignored. `setup-vpn.sh` writes it. The 50 containers read it via `${…}`.
+  gitignored. `setup-vpn.sh` writes it. The containers read it via `${…}`.
 - **Deploy:** push to `main` → VPS auto-pulls + rebuilds + restarts the Go
   service. Deploy does **not** run `docker compose up` for this app, so compose
   changes reach running containers only through the Sunday staggered restart or
@@ -27,12 +27,12 @@ containers so consumers get rotating egress IPs.
 
 The endpoint set is defined in **two places that MUST stay 1:1**:
 
-1. `endpoints.json` lists **50** endpoints (`name`, `proxy_url`), each pointing at
-   `http://127.0.0.1:88xx` (host ports **8881–8930**). `go:embed` builds it into
+1. `endpoints.json` lists **100** endpoints (`name`, `proxy_url`), each pointing at
+   `http://127.0.0.1:88xx`/`89xx` (host ports **8881–8980**). `go:embed` builds it into
    the binary. `ENDPOINTS_FILE` overrides it at run time, and `${VAR}` in a
    `proxy_url` expands from the environment (for credentials of a remote farm).
-2. `docker-compose.yml` defines **50** `vpn-*` services, each publishing
-   `127.0.0.1:88xx:8888` on a unique static IP `172.22.0.x`. The shared settings
+2. `docker-compose.yml` defines **100** `vpn-*` services, each publishing
+   `127.0.0.1:<port>:8888` on a unique static IP `172.22.0.x` (`.10`–`.109`). The shared settings
    sit in the `x-gluetun` / `x-pia-env` anchors.
 
 An endpoint `name` must equal its service's `SERVER_REGIONS`, and its port must
@@ -60,19 +60,19 @@ failover covers dead slots.
 `docker compose up -d` started only the 20 un-profiled ones. Combined with the
 old weekly cron (below), the running set became a one-way ratchet that only
 shrank — leaving `main.go` round-robining over 30 dead ports (mostly `502`).
-The profiles were removed so **all 50 start by default**. If you ever need to
+The profiles were removed so **all of them start by default**. If you ever need to
 reduce capacity, drop the endpoints from `endpoints.json` too (keep them 1:1)
 rather than disabling containers behind the running proxy.
 
 **Bring up / reconcile the full farm (over SSH):**
 ```bash
-cd /opt/reverse-proxy/apps/proxy-server && docker compose up -d   # → all 50
-docker ps --filter name=vpn- --format '{{.Names}}' | wc -l        # → 50
+cd /opt/reverse-proxy/apps/proxy-server && docker compose up -d   # → all 100
+docker ps --filter name=vpn- --format '{{.Names}}' | wc -l        # → 100
 ```
 
 **Weekly maintenance cron** (root crontab on the Main VPS) Sunday 3am: pulls a
 fresh gluetun image (keeps the server list current — see below), then recreates
-the farm in batches of 10 with 20s gaps between batches (keeps ~40 tunnels live
+the farm in batches of 10 with 20s gaps between batches (keeps ~90 tunnels live
 throughout maintenance, clears memory leaks, and reconciles any stopped
 container). The script lives at `scripts/staggered-restart.sh` in this repo.
 
@@ -81,9 +81,10 @@ container). The script lives at `scripts/staggered-restart.sh` in this repo.
 0 3 * * 0 cd /opt/reverse-proxy/apps/proxy-server && bash scripts/staggered-restart.sh >> /var/log/vpn-restart.log 2>&1
 ```
 
-**Do NOT** use the old one-liner (`docker compose up -d --force-recreate` on all 50
-at once) — it drives host CPU load to ~50 for ~60s (50 concurrent OpenVPN inits
-on a 12-core host) and causes a complete proxy outage during that window.
+**Do NOT** use the old one-liner (`docker compose up -d --force-recreate` on the
+whole farm at once) — with 50 tunnels it drove host CPU load to ~50 for ~60s
+(50 concurrent OpenVPN inits on a 12-core host) and caused a complete proxy
+outage during that window. With 100 it would be worse.
 
 ## Dead regions = a STALE server list, not bad config
 
@@ -117,7 +118,7 @@ Two traps when diagnosing this:
 
 - **`docker ps` health lies.** Five of the seven reported `healthy` while unable
   to pass traffic (the healthcheck runs every 5m with 3 retries). Trust the
-  proxy's own `[health] N/50` log line, or curl through the port.
+  proxy's own `[health] N/100` log line, or curl through the port.
 - **ICMP is not a liveness test.** `US Chicago` fails to answer ping on all 8 of
   its listed IPs yet its tunnel works. Only an actual gluetun container plus a
   `curl -x` through it proves a region is usable.
@@ -132,6 +133,23 @@ Two traps when diagnosing this:
   `main.go` names 1:1). Silicon Valley was one of the regions retired on
   2026-07-31; it connected again on 2026-09-27.
 
+**2026-09-29: expanded 50 → 100, and New Mexico swapped.** `US New Mexico`
+(8922) failed `TLS handshake failed` for over 24 h: gluetun dialed only
+`84.239.33.x`, while PIA's live list had moved the region to `147.90.190.x`
+(the Las Vegas/Berlin pattern). It was swapped for **Austria** (same port and
+static IP). 70 unused regions were tested as throwaway containers (10 at a
+time on 127.0.0.1:19800–19809, `curl -x` through each). 60 finished before the
+selection: 53 worked, all with exit IPs outside the farm's /24s. Dead: DE
+Berlin, US Las Vegas, Serbia, Kazakhstan. Not in gluetun's list: UK Tottenham,
+US South Carolina, US Tennessee. 50 working ones became ports 8931–8980
+(`.60`–`.109`). The picks, in order, were Europe first (closest to the VPS),
+then North America, then the rest. Streaming Optimized variants were skipped
+because they share servers with their base regions.
+
 **Resource note:** tunnels use about 30 MiB each (cap 256 MiB). On 2026-09-29
-the 50 used 1.5 GiB in total on the 47 GiB host, and a median of 1.7% CPU each. CPU caps are `cpus: 0.50` per container (raised from `0.10` to
+the 50 used 1.5 GiB in total on the 47 GiB host, and a median of 1.7% CPU each,
+so 100 need about 3 GiB and one extra core. The host is CPU-bound by other
+services (load 40–75 on 12 cores, mostly the redeemers), and `docker run` takes
+~20 s per container under that load. Start new tunnels in small batches.
+CPU caps are `cpus: 0.50` per container (raised from `0.10` to
 stop CFS throttling — see infra `VPS_PERFORMANCE_INVESTIGATION.md`).

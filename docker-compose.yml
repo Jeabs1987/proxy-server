@@ -1,4 +1,4 @@
-# 50 gluetun (PIA) tunnels behind the Go proxy. endpoints.json lists each one
+# 100 gluetun (PIA) tunnels behind the Go proxy. endpoints.json lists each one
 # 1:1: the endpoint name equals SERVER_REGIONS and its port equals the host
 # port published here. endpoints_test.go checks this, so run `go test ./...`
 # after any change to either file.
@@ -563,13 +563,13 @@ services:
     ports:
       - "127.0.0.1:8921:8888"
 
-  # PIA VPN - US New Mexico
-  vpn-newmexico:
+  # PIA VPN - Austria (was US New Mexico; PIA moved its servers, see CLAUDE.md)
+  vpn-austria:
     <<: *gluetun
-    container_name: vpn-newmexico
+    container_name: vpn-austria
     environment:
       <<: *pia-env
-      SERVER_REGIONS: US New Mexico
+      SERVER_REGIONS: Austria
     networks:
       vpn_network:
         ipv4_address: 172.22.0.51
@@ -679,6 +679,656 @@ services:
         ipv4_address: 172.22.0.59
     ports:
       - "127.0.0.1:8930:8888"
+
+  # PIA VPN - Belgium
+  vpn-belgium:
+    <<: *gluetun
+    container_name: vpn-belgium
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Belgium
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.60
+    ports:
+      - "127.0.0.1:8931:8888"
+
+  # PIA VPN - Bulgaria
+  vpn-bulgaria:
+    <<: *gluetun
+    container_name: vpn-bulgaria
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Bulgaria
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.61
+    ports:
+      - "127.0.0.1:8932:8888"
+
+  # PIA VPN - Switzerland
+  vpn-switzerland:
+    <<: *gluetun
+    container_name: vpn-switzerland
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Switzerland
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.62
+    ports:
+      - "127.0.0.1:8933:8888"
+
+  # PIA VPN - Czech Republic
+  vpn-czechrepublic:
+    <<: *gluetun
+    container_name: vpn-czechrepublic
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Czech Republic
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.63
+    ports:
+      - "127.0.0.1:8934:8888"
+
+  # PIA VPN - Denmark
+  vpn-denmark:
+    <<: *gluetun
+    container_name: vpn-denmark
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Denmark
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.64
+    ports:
+      - "127.0.0.1:8935:8888"
+
+  # PIA VPN - Estonia
+  vpn-estonia:
+    <<: *gluetun
+    container_name: vpn-estonia
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Estonia
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.65
+    ports:
+      - "127.0.0.1:8936:8888"
+
+  # PIA VPN - ES Valencia
+  vpn-valencia:
+    <<: *gluetun
+    container_name: vpn-valencia
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: ES Valencia
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.66
+    ports:
+      - "127.0.0.1:8937:8888"
+
+  # PIA VPN - FI Helsinki
+  vpn-helsinki:
+    <<: *gluetun
+    container_name: vpn-helsinki
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: FI Helsinki
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.67
+    ports:
+      - "127.0.0.1:8938:8888"
+
+  # PIA VPN - UK Manchester
+  vpn-ukmanchester:
+    <<: *gluetun
+    container_name: vpn-ukmanchester
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: UK Manchester
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.68
+    ports:
+      - "127.0.0.1:8939:8888"
+
+  # PIA VPN - UK Southampton
+  vpn-uksouthampton:
+    <<: *gluetun
+    container_name: vpn-uksouthampton
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: UK Southampton
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.69
+    ports:
+      - "127.0.0.1:8940:8888"
+
+  # PIA VPN - Greece
+  vpn-greece:
+    <<: *gluetun
+    container_name: vpn-greece
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Greece
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.70
+    ports:
+      - "127.0.0.1:8941:8888"
+
+  # PIA VPN - Croatia
+  vpn-croatia:
+    <<: *gluetun
+    container_name: vpn-croatia
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Croatia
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.71
+    ports:
+      - "127.0.0.1:8942:8888"
+
+  # PIA VPN - Hungary
+  vpn-hungary:
+    <<: *gluetun
+    container_name: vpn-hungary
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Hungary
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.72
+    ports:
+      - "127.0.0.1:8943:8888"
+
+  # PIA VPN - Iceland
+  vpn-iceland:
+    <<: *gluetun
+    container_name: vpn-iceland
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Iceland
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.73
+    ports:
+      - "127.0.0.1:8944:8888"
+
+  # PIA VPN - Lithuania
+  vpn-lithuania:
+    <<: *gluetun
+    container_name: vpn-lithuania
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Lithuania
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.74
+    ports:
+      - "127.0.0.1:8945:8888"
+
+  # PIA VPN - Luxembourg
+  vpn-luxembourg:
+    <<: *gluetun
+    container_name: vpn-luxembourg
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Luxembourg
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.75
+    ports:
+      - "127.0.0.1:8946:8888"
+
+  # PIA VPN - Latvia
+  vpn-latvia:
+    <<: *gluetun
+    container_name: vpn-latvia
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Latvia
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.76
+    ports:
+      - "127.0.0.1:8947:8888"
+
+  # PIA VPN - Moldova
+  vpn-moldova:
+    <<: *gluetun
+    container_name: vpn-moldova
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Moldova
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.77
+    ports:
+      - "127.0.0.1:8948:8888"
+
+  # PIA VPN - North Macedonia
+  vpn-northmacedonia:
+    <<: *gluetun
+    container_name: vpn-northmacedonia
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: North Macedonia
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.78
+    ports:
+      - "127.0.0.1:8949:8888"
+
+  # PIA VPN - Norway
+  vpn-norway:
+    <<: *gluetun
+    container_name: vpn-norway
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Norway
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.79
+    ports:
+      - "127.0.0.1:8950:8888"
+
+  # PIA VPN - Portugal
+  vpn-portugal:
+    <<: *gluetun
+    container_name: vpn-portugal
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Portugal
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.80
+    ports:
+      - "127.0.0.1:8951:8888"
+
+  # PIA VPN - Romania
+  vpn-romania:
+    <<: *gluetun
+    container_name: vpn-romania
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Romania
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.81
+    ports:
+      - "127.0.0.1:8952:8888"
+
+  # PIA VPN - Slovenia
+  vpn-slovenia:
+    <<: *gluetun
+    container_name: vpn-slovenia
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Slovenia
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.82
+    ports:
+      - "127.0.0.1:8953:8888"
+
+  # PIA VPN - Slovakia
+  vpn-slovakia:
+    <<: *gluetun
+    container_name: vpn-slovakia
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Slovakia
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.83
+    ports:
+      - "127.0.0.1:8954:8888"
+
+  # PIA VPN - Ukraine
+  vpn-ukraine:
+    <<: *gluetun
+    container_name: vpn-ukraine
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Ukraine
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.84
+    ports:
+      - "127.0.0.1:8955:8888"
+
+  # PIA VPN - Albania
+  vpn-albania:
+    <<: *gluetun
+    container_name: vpn-albania
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Albania
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.85
+    ports:
+      - "127.0.0.1:8956:8888"
+
+  # PIA VPN - CA Ontario
+  vpn-ontario:
+    <<: *gluetun
+    container_name: vpn-ontario
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: CA Ontario
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.86
+    ports:
+      - "127.0.0.1:8957:8888"
+
+  # PIA VPN - US Atlanta
+  vpn-atlanta:
+    <<: *gluetun
+    container_name: vpn-atlanta
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: US Atlanta
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.87
+    ports:
+      - "127.0.0.1:8958:8888"
+
+  # PIA VPN - US Texas
+  vpn-texas:
+    <<: *gluetun
+    container_name: vpn-texas
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: US Texas
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.88
+    ports:
+      - "127.0.0.1:8959:8888"
+
+  # PIA VPN - US South Dakota
+  vpn-southdakota:
+    <<: *gluetun
+    container_name: vpn-southdakota
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: US South Dakota
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.89
+    ports:
+      - "127.0.0.1:8960:8888"
+
+  # PIA VPN - US Wyoming
+  vpn-wyoming:
+    <<: *gluetun
+    container_name: vpn-wyoming
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: US Wyoming
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.90
+    ports:
+      - "127.0.0.1:8961:8888"
+
+  # PIA VPN - US Kentucky
+  vpn-kentucky:
+    <<: *gluetun
+    container_name: vpn-kentucky
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: US Kentucky
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.91
+    ports:
+      - "127.0.0.1:8962:8888"
+
+  # PIA VPN - US New Hampshire
+  vpn-newhampshire:
+    <<: *gluetun
+    container_name: vpn-newhampshire
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: US New Hampshire
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.92
+    ports:
+      - "127.0.0.1:8963:8888"
+
+  # PIA VPN - US Oklahoma
+  vpn-oklahoma:
+    <<: *gluetun
+    container_name: vpn-oklahoma
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: US Oklahoma
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.93
+    ports:
+      - "127.0.0.1:8964:8888"
+
+  # PIA VPN - US Oregon
+  vpn-oregon:
+    <<: *gluetun
+    container_name: vpn-oregon
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: US Oregon
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.94
+    ports:
+      - "127.0.0.1:8965:8888"
+
+  # PIA VPN - US Pennsylvania
+  vpn-pennsylvania:
+    <<: *gluetun
+    container_name: vpn-pennsylvania
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: US Pennsylvania
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.95
+    ports:
+      - "127.0.0.1:8966:8888"
+
+  # PIA VPN - US Rhode Island
+  vpn-rhodeisland:
+    <<: *gluetun
+    container_name: vpn-rhodeisland
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: US Rhode Island
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.96
+    ports:
+      - "127.0.0.1:8967:8888"
+
+  # PIA VPN - US Vermont
+  vpn-vermont:
+    <<: *gluetun
+    container_name: vpn-vermont
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: US Vermont
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.97
+    ports:
+      - "127.0.0.1:8968:8888"
+
+  # PIA VPN - US Virginia
+  vpn-virginia:
+    <<: *gluetun
+    container_name: vpn-virginia
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: US Virginia
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.98
+    ports:
+      - "127.0.0.1:8969:8888"
+
+  # PIA VPN - US West Virginia
+  vpn-westvirginia:
+    <<: *gluetun
+    container_name: vpn-westvirginia
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: US West Virginia
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.99
+    ports:
+      - "127.0.0.1:8970:8888"
+
+  # PIA VPN - US Honolulu
+  vpn-honolulu:
+    <<: *gluetun
+    container_name: vpn-honolulu
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: US Honolulu
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.100
+    ports:
+      - "127.0.0.1:8971:8888"
+
+  # PIA VPN - Israel
+  vpn-israel:
+    <<: *gluetun
+    container_name: vpn-israel
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Israel
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.101
+    ports:
+      - "127.0.0.1:8972:8888"
+
+  # PIA VPN - United Arab Emirates
+  vpn-unitedarabemirates:
+    <<: *gluetun
+    container_name: vpn-unitedarabemirates
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: United Arab Emirates
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.102
+    ports:
+      - "127.0.0.1:8973:8888"
+
+  # PIA VPN - Argentina
+  vpn-argentina:
+    <<: *gluetun
+    container_name: vpn-argentina
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Argentina
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.103
+    ports:
+      - "127.0.0.1:8974:8888"
+
+  # PIA VPN - Brazil
+  vpn-brazil:
+    <<: *gluetun
+    container_name: vpn-brazil
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Brazil
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.104
+    ports:
+      - "127.0.0.1:8975:8888"
+
+  # PIA VPN - Chile
+  vpn-chile:
+    <<: *gluetun
+    container_name: vpn-chile
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Chile
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.105
+    ports:
+      - "127.0.0.1:8976:8888"
+
+  # PIA VPN - Colombia
+  vpn-colombia:
+    <<: *gluetun
+    container_name: vpn-colombia
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Colombia
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.106
+    ports:
+      - "127.0.0.1:8977:8888"
+
+  # PIA VPN - South Africa
+  vpn-southafrica:
+    <<: *gluetun
+    container_name: vpn-southafrica
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: South Africa
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.107
+    ports:
+      - "127.0.0.1:8978:8888"
+
+  # PIA VPN - JP Tokyo
+  vpn-tokyo:
+    <<: *gluetun
+    container_name: vpn-tokyo
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: JP Tokyo
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.108
+    ports:
+      - "127.0.0.1:8979:8888"
+
+  # PIA VPN - Singapore
+  vpn-singapore:
+    <<: *gluetun
+    container_name: vpn-singapore
+    environment:
+      <<: *pia-env
+      SERVER_REGIONS: Singapore
+    networks:
+      vpn_network:
+        ipv4_address: 172.22.0.109
+    ports:
+      - "127.0.0.1:8980:8888"
 
 networks:
   vpn_network:
