@@ -45,20 +45,38 @@ def load_token():
     return None
 
 
-def load_api_key():
-    """Read API_KEY from the proxy's own systemd unit so the secret lives in one place."""
-    if os.environ.get("API_KEY"):
-        return os.environ["API_KEY"]
+def unit_property(prop):
     try:
-        out = subprocess.run(
-            ["systemctl", "show", UNIT, "-p", "Environment", "--value"],
+        return subprocess.run(
+            ["systemctl", "show", UNIT, "-p", prop, "--value"],
             capture_output=True, text=True, timeout=10,
         ).stdout
     except (OSError, subprocess.SubprocessError):
-        return None
-    for tok in out.split():
-        if tok.startswith("API_KEY="):
-            return tok.split("=", 1)[1]
+        return ""
+
+
+def load_api_key():
+    """Read API_KEY from the proxy's own systemd unit so the secret lives in one place.
+
+    The key lives in the unit's EnvironmentFile (unit-secrets), and
+    `systemctl show -p Environment` does not list values from such files. Reading
+    only Environment left this monitor without a key, so every check got 401 and
+    it reported the farm down for weeks without alerting on dead tunnels.
+    """
+    if os.environ.get("API_KEY"):
+        return os.environ["API_KEY"]
+    lines = unit_property("Environment").split()
+    for entry in unit_property("EnvironmentFiles").splitlines():
+        path = entry.split(" (", 1)[0].strip().lstrip("-")
+        try:
+            with open(path) as f:
+                lines += f.read().splitlines()
+        except OSError:
+            pass
+    for line in lines:
+        line = line.strip()
+        if line.startswith("API_KEY="):
+            return line.split("=", 1)[1].strip().strip('"').strip("'")
     return None
 
 
