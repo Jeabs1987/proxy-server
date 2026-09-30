@@ -43,6 +43,36 @@ Follow these instructions to ensure your application deploys and runs correctly 
   [Reverse-Proxy secondary integration](https://github.com/ArmadaInteractiveCo/Reverse-Proxy/blob/main/.github/SECONDARY_VPS.md)
   (local infra checkout: `.github/SECONDARY_VPS.md`).
 
+## Load balancing (both Main VPSes)
+
+- **Since 2026-09-30, Cloudflare load balances some apps across both Main VPSes.**
+  The list is `configs/lb/apps.json` in the infra repo. Spec:
+  [LOAD_BALANCING.md](https://github.com/ArmadaInteractiveCo/Reverse-Proxy/blob/main/.github/LOAD_BALANCING.md)
+  (local infra checkout: `.github/LOAD_BALANCING.md`).
+- If this app is listed, the same build runs on both hosts. A push still deploys
+  as before: Primary builds, then copies the result to Secondary within a minute
+  or two. For that minute the hosts run different versions, so APIs and schema
+  changes must accept the previous version.
+- **Keep all shared state in the database.** Two copies serve traffic, so files
+  the app writes on local disk, in-memory sessions and in-memory caches that must
+  agree exist once per host. A visitor keeps one host for 23 hours (Cloudflare
+  affinity cookie), but a failover moves them.
+- **Primary holds the only writable database.** The copy on Secondary uses the
+  same database over the private link (about 40 ms per query). Edit data, such
+  as a question bank, once. Both copies see the change at once. Secondary also
+  keeps a replica that an operator promotes if Primary is lost.
+- **Do not run scheduled jobs that write, email, message or pay in both copies.**
+  Put such a job behind an env switch that the infra sets off on Secondary
+  (`env.secondary` in the manifest), or keep the app off the load balancer.
+- Keep `localhost:<port>` URLs for shared services (payments, LLM, support).
+  On Secondary those ports forward to Primary.
+- Health checks and logs are per host. `/api/logs/server` shows the host that
+  answered.
+- Multiplayer games that keep rooms in memory need per-server lobby routing
+  before they can be load balanced. The fishpals model is in the spec.
+- To enroll an app, or before adding local state to an enrolled one, read the
+  spec's "Adding an app" section.
+
 ## Build & Run Requirements
 
 ### 1. Go Backend
