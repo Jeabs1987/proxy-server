@@ -11,67 +11,95 @@ Follow these instructions to ensure your application deploys and runs correctly 
 - **Process Manager:** Systemd manages the Go binary.
 - **Deployment:** Automated via `deploy.sh` on the host, which pulls changes, builds, and restarts services.
 
-## Secondary Main VPS / sharded components
+## Main VPS fleet and load balancing
 
-- Primary: `ssh root@213.199.48.131` (or `ssh vps-primary` on the owner's workstation).
-- Secondary: `ssh root@169.58.2.110` (or `ssh vps-secondary`), port **22**, same operator
-  `~/.ssh/id_ed25519` identity. Never put SSH keys or server passwords in this repo.
-- **Status 2026-09-28: Secondary is secured and privately connected; no production apps migrated.**
-  Private addresses are `primary.internal` / `10.20.0.1` and
-  `secondary.internal` / `10.20.0.2`, over a separate `wg-apps` tunnel. These are
-  not public DNS records; they resolve locally on both VPSes.
-- Set remote dependencies through env variables (`WORKER_BASE_URL`,
-  `PRIMARY_API_BASE_URL`); `localhost` URLs elsewhere in this document mean the
-  service is on **Primary**. Shared services do not automatically exist on Secondary.
-- Bind workers to their private address and `PORT`; request per-port firewall rules,
-  use per-service authentication, deadlines and version-reporting health endpoints.
-  Keep secrets in root-owned per-service EnvironmentFiles, outside Git/releases.
-- Reuse HTTP connections, batch CPU work and cap worker concurrency. Keep a single
-  owner for each queue/job; add idempotency and backpressure before moving work.
-  The tunnel has a pair-specific pre-shared key; app credentials remain separate.
-- Sharding is opt-in through infra `configs/fleet/projects.json`: one full Git SHA,
-  ordered host roles, and a committed `.infra/fleet.sh` implementing `prepare`,
-  `activate`, `health`, `rollback`. `scripts/fleet-deploy.py` stages that same commit
-  everywhere before activation and attempts rollback on failure. It is currently
-  operator-triggered; an enrolled app's normal push does not deploy it by itself.
-- Never run the Primary all-services `deploy.sh` on Secondary. Before enrolling an
-  existing app, drain/disable its old unit and pause it in infra. Provision dedicated
-  `fleet-<project>-<role>` systemd units; never duplicate scheduled jobs, mutable
-  databases, payment execution or game-account sessions. Rolling upgrades require
-  adjacent-version compatibility; this is not an atomic two-server transaction.
-- Full runbook, readiness, measured latency, hook/recovery/backup contract:
-  [Reverse-Proxy secondary integration](https://github.com/ArmadaInteractiveCo/Reverse-Proxy/blob/main/.github/SECONDARY_VPS.md)
-  (local infra checkout: `.github/SECONDARY_VPS.md`).
+Primary is `vps-primary` / `213.199.48.131`; Secondary is `vps-secondary` /
+`169.58.2.110`, SSH port 22. Their private `wg-apps` addresses are `10.20.0.1`
+and `10.20.0.2`. Use operator SSH configuration; never put keys or credentials in
+application repositories. Both hosts now serve selected production applications.
+Placement is explicit per app, not an assumption that every service runs twice.
 
-## Load balancing (both Main VPSes)
+The canonical contract is
+[LOAD_BALANCING.md](https://github.com/ArmadaInteractiveCo/Reverse-Proxy/blob/main/.github/LOAD_BALANCING.md).
+`configs/lb/apps.json` declares arbitrary named hosts, app placements, environments
+and health requirements. New VPSes start disabled. `scripts/lb-fleet.py` enrolls the
+private network/firewall and stages the same verified release before an operator
+activates traffic. Never run Primary's all-services `deploy.sh` on a worker.
+See also [SECONDARY_VPS.md](https://github.com/ArmadaInteractiveCo/Reverse-Proxy/blob/main/.github/SECONDARY_VPS.md).
 
-- **Since 2026-09-30, Cloudflare load balances some apps across both Main VPSes.**
-  The list is `configs/lb/apps.json` in the infra repo. Spec:
-  [LOAD_BALANCING.md](https://github.com/ArmadaInteractiveCo/Reverse-Proxy/blob/main/.github/LOAD_BALANCING.md)
-  (local infra checkout: `.github/LOAD_BALANCING.md`).
-- If this app is listed, the same build runs on both hosts. A push still deploys
-  as before: Primary builds, then copies the result to Secondary within a minute
-  or two. For that minute the hosts run different versions, so APIs and schema
-  changes must accept the previous version.
-- **Keep all shared state in the database.** Two copies serve traffic, so files
-  the app writes on local disk, in-memory sessions and in-memory caches that must
-  agree exist once per host. A visitor keeps one host for 23 hours (Cloudflare
-  affinity cookie), but a failover moves them.
-- **Primary holds the only writable database.** The copy on Secondary uses the
-  same database over the private link (about 40 ms per query). Edit data, such
-  as a question bank, once. Both copies see the change at once. Secondary also
-  keeps a replica that an operator promotes if Primary is lost.
-- **Do not run scheduled jobs that write, email, message or pay in both copies.**
-  Put such a job behind an env switch that the infra sets off on Secondary
-  (`env.secondary` in the manifest), or keep the app off the load balancer.
-- Keep `localhost:<port>` URLs for shared services (payments, LLM, support).
-  On Secondary those ports forward to Primary.
-- Health checks and logs are per host. `/api/logs/server` shows the host that
-  answered.
-- Multiplayer games that keep rooms in memory need per-server lobby routing
-  before they can be load balanced. The fishpals model is in the spec.
-- To enroll an app, or before adding local state to an enrolled one, read the
-  spec's "Adding an app" section.
+### Releases, readiness and routing
+
+- Normal pushes build on Primary and synchronize enrolled workers before cache
+  purging. Worker activation uses staged runtime/config snapshots and readiness
+  checks with rollback/recovery receipts. Identical synchronization is a no-op;
+  never overwrite worker-seeded mutable state or restart unchanged applications.
+- Primary and workers may briefly serve adjacent builds. Keep APIs and migrations
+  compatible. A change that introduces writer fencing requires a coordinated
+  drain of all old unfenced writers before activation. A rollout is not an atomic
+  distributed transaction; inspect every host's release/readiness result.
+- `/health/ready` must verify the dependencies needed to accept new work, including
+  subscriptions/registrations for stateful services. Nginx app health removes a bad
+  backend independently of slower Cloudflare host monitoring. Stale database
+  recovery-copy health is also reported. Do not turn dependency failure into a
+  successful empty response or an authentication failure.
+- Cloudflare affinity is a performance preference, never an authentication or
+  correctness guarantee. Any HTTP request may reach another healthy origin.
+  Safe GET fallback is bounded; POST and other state-changing requests are not
+  replayed to another upstream. Fixed shard URLs never fall back to another shard.
+- Trust forwarded scheme/client-address headers only from the dedicated known
+  proxies/private peers. Nginx overwrites forwarded headers before passing them
+  upstream. Configure trusted CIDRs narrowly; never accept user-supplied forwarded
+  values merely because a request contains those headers.
+
+### Shared data, sessions and background work
+
+- Enrolled replicas use the same authoritative data services over the private
+  network. PostgreSQL has one writable primary. MongoDB uses its configured
+  primary/replica set. Redis sessions and coordination use one shared authority.
+  Secondary recovery copies are not independent application writers.
+- Authentication sessions, one-use login tickets, OAuth state, revocation and
+  abuse-control buckets must work across origins. Avoid in-memory session stores
+  and per-host rate limits that clients can evade by changing origin. Shared
+  dependency failures should return unavailable while preserving a valid sign-in.
+- Keep durable user data and uploads in shared storage. A local cache is safe only
+  if losing or changing hosts cannot change the user's authoritative state. Use
+  deadlines, pooled connections, bounded concurrency and batched queries across
+  the private link. Check production latency before multiplying host count.
+- Scheduled writes, email/messages, payments and game-account jobs need an explicit
+  owner or durable idempotency. Disable duplicate workers using the manifest's
+  per-host environment overrides. Never run a second independent writer just
+  because another VPS is available.
+- Shared `localhost` service endpoints are valid on workers only where the infra
+  provisions a forwarding service. Declare new remote dependencies explicitly and
+  verify their authentication/readiness; do not assume all Primary ports exist.
+- Database recovery requires writer fencing before promotion and the documented
+  failback procedure. PostgreSQL, MongoDB and persistent Redis replicas improve
+  recovery; they do not provide automatic multi-writer application availability.
+  Never promote a recovery copy while the old writer can still accept writes.
+
+### Stateful games and lobby routing
+
+A load balancer distributes connections; the game admission service places players.
+Fishpals uses a live ready-shard directory, globally unique lobby IDs and codes,
+named expiring reservations, per-host budgets and fixed `/ws/shards/<ID>` routes.
+Its defaults are ten random players plus ten invitation places per public lobby,
+and configurable friends lobbies with owner-controlled access. Adding a compatible
+registered shard contributes capacity without changing an application A/B list.
+
+Cross-VPS travel reserves the destination first, commits the final snapshot and a
+bound recoverable handoff, then logs in with a fresh shared-session ticket. The
+destination confirms lobby, shard, incarnation and admission. PostgreSQL ownership
+generations reject old saves/cleanup; Redis presence is only a routing hint. An
+uncertain transfer uses receipt recovery. Exact joins never silently matchmake
+elsewhere, and parties require explicit departure consent across shards.
+
+Applications with in-memory rooms, sessions or queues must implement their own
+correct placement/ownership boundary before enabling multiple copies. Fishpals'
+[LOBBY_SYSTEM](https://github.com/ArmadaInteractiveCo/fishpals/blob/main/.github/LOBBY_SYSTEM.md)
+is the application contract; it does not make other games automatically shard-safe.
+For independently deployed worker roles rather than mirrored web origins, use the
+separate `configs/fleet/projects.json` / `.infra/fleet.sh` prepare/activate/health/
+rollback workflow described in SECONDARY_VPS. Preserve its explicit role ownership.
 
 ## Build & Run Requirements
 
@@ -114,7 +142,7 @@ node_modules/
 
 ## Workflow
 1.  **Local Development:**
-    - Run `go run main.go` (or similar).
+    - Edit locally; run builds, tests and services on an isolated VPS checkout over SSH.
     - Use a `.env` file for local secrets (do not commit it).
 2.  **Pushing Changes:**
     - Commit and push to your repository's `main` branch.
@@ -359,8 +387,8 @@ The infrastructure includes a shared **support-gateway** service that powers a t
         proxy_read_timeout 86400s;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $http_x_forwarded_proto;
+        proxy_set_header X-Forwarded-For $remote_addr;
+        proxy_set_header X-Forwarded-Proto $scheme;
         add_header Cache-Control "no-transform";
     }
     ```
