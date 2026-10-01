@@ -23,8 +23,12 @@ containers so consumers get rotating egress IPs.
   changes reach running containers only through the Sunday staggered restart or
   a manual `docker compose up -d --no-deps <services>` over SSH.
   Run runtime/docker commands over SSH on the Main VPS (`root@213.199.48.131`).
-  Secondary (`root@169.58.2.110`, key-only) does not run the farm; never start
-  these containers there. Never hand-edit files under `/opt/reverse-proxy/apps/` on the VPS.
+  Secondary (`root@169.58.2.110`, key-only) holds a **standby** farm. Its
+  controller starts it only while this farm is unreachable, and stops it after
+  this farm has been healthy for a while. Never start it by hand next to a live
+  farm: both use one PIA account. A drill uses `proxy-standby start --only <services>`.
+  Spec: [PROXY_STANDBY.md](https://github.com/ArmadaInteractiveCo/Reverse-Proxy/blob/main/.github/PROXY_STANDBY.md).
+  Never hand-edit files under `/opt/reverse-proxy/apps/` on the VPS.
 
 ## The Endpoint Invariant (read before touching the farm)
 
@@ -41,7 +45,10 @@ The endpoint set is defined in **two places that MUST stay 1:1**:
 An endpoint `name` must equal its service's `SERVER_REGIONS`, and its port must
 equal the published port.
 
-**Verify correspondence after any change:** `go test ./...`.
+**Verify correspondence after any change:** `go test ./...`. The standby on
+Secondary receives `docker-compose.yml`, `endpoints.json`, `main` and `.env` from
+this checkout within minutes of a deploy. It refuses a release in which the two
+files disagree, and keeps its last good copy.
 `TestEndpointsMatchCompose` fails on any name, port, or static-IP mismatch.
 
 **Health and failover.** `StartHealthChecks` probes each tunnel every 60 s
