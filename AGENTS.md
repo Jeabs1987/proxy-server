@@ -1,4 +1,6 @@
-# proxy-server — Claude Code Guide
+# proxy-server — Agent Guide
+
+This is the project's only agent-instruction file. Do not add a `CLAUDE.md`: Claude Code reads `AGENTS.md` only when no `CLAUDE.md` exists in the working directory or any parent.
 
 VPN-farm HTTP proxy. A Go service (`main.go`) round-robins outbound requests
 across a farm of [gluetun](https://github.com/qdm12/gluetun) (PIA) Docker
@@ -20,8 +22,9 @@ containers so consumers get rotating egress IPs.
   service. Deploy does **not** run `docker compose up` for this app, so compose
   changes reach running containers only through the Sunday staggered restart or
   a manual `docker compose up -d --no-deps <services>` over SSH.
-  Run runtime/docker commands over SSH on the Main VPS (`root@213.199.48.131`);
-  never hand-edit files under `/opt/reverse-proxy/apps/` on the VPS.
+  Run runtime/docker commands over SSH on the Main VPS (`root@213.199.48.131`).
+  Secondary (`root@169.58.2.110`, key-only) does not run the farm; never start
+  these containers there. Never hand-edit files under `/opt/reverse-proxy/apps/` on the VPS.
 
 ## The Endpoint Invariant (read before touching the farm)
 
@@ -153,3 +156,30 @@ services (load 40–75 on 12 cores, mostly the redeemers), and `docker run` take
 ~20 s per container under that load. Start new tunnels in small batches.
 CPU caps are `cpus: 0.50` per container (raised from `0.10` to
 stop CFS throttling — see infra `VPS_PERFORMANCE_INVESTIGATION.md`).
+
+## Model Orchestration
+
+Read your own model name. It decides whether you orchestrate or do the work.
+
+| Running model | Role | Delegates to |
+|---|---|---|
+| Claude Opus | Orchestrator | Claude Sonnet |
+| astra | Orchestrator | sol, terra or luna, by task difficulty |
+| sol | Orchestrator | sol, terra or luna, by task difficulty |
+| Claude Sonnet, terra, luna, any other model | Worker | No one (see the last rule) |
+
+An orchestrator holds the plan and makes the hard calls: architecture, correctness,
+ambiguity and the final review. It sends the mechanical, well-specified work to a
+lower tier through the harness's subagent mechanism (in Claude Code, the `Agent`
+tool or `Workflow`). Spend your own tokens on judgement, not on grunt work.
+
+- **Keep (do it yourself):** decomposition, sequencing, disambiguation, correctness
+  and accuracy judgement, conflicting results, and the final go/no-go on subagent output.
+- **Delegate to the tier in the table:** well-specified edits, boilerplate, bulk
+  refactors, search sweeps, test runs, formatting, and any task with a verifiable result.
+  Pick the lowest tier that can do the task reliably. If a task is ambiguous, or writing
+  the brief costs more than doing the work, do it yourself.
+- **Verify, don't trust:** a subagent's result is an input to your judgement, not a
+  final answer. You stay accountable for accuracy.
+- **Workers:** do the work in your own loop. Use subagents only to fan out independent,
+  parallel work, never to hand off judgement.
